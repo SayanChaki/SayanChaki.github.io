@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Previous head section remains the same -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayan K Chaki - Computer Vision Scientist</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        /* Previous styles remain the same */
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --text-color: #2d3748;
+            --light-bg: #f7fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 2rem 0;
+            object-fit: cover;
+        }
+
+        section {
+            padding: 4rem 0;
+        }
+
+        section:nth-child(even) {
+            background: var(--light-bg);
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+        }
+
+        .research-grid, .summer-school-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .research-card, .summer-school-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .research-card:hover, .summer-school-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .research-img, .summer-school-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .research-content, .summer-school-content {
+            padding: 1.5rem;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .skill-tag {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #63b3ed;
+        }
+
+        .publication-item {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            section {
+                padding: 2rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Previous header section remains the same -->
+    <header>
+        <div class="container">
+            <img src="/api/placeholder/200/200" alt="Sayan K Chaki" class="profile-img">
+            <h1>Sayan K Chaki</h1>
+            <p>Computer Vision Scientist | Digital Humanities Researcher</p>
+            <div class="social-links">
+                <a href="https://linkedin.com/in/sayan-chaki-vision/" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/SayanChaki" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Previous about section remains the same -->
+    <section id="about">
+        <div class="container">
+            <h2>About Me</h2>
+            <p>Final-year doctoral candidate specializing in computer vision and digital humanities, with expertise in unsupervised analysis of historical ornaments. I have collaborated with prestigious institutions including University of Oxford's VGG, IMAGINE École des Ponts ParisTech, and TU Vienna on computational analysis of cultural artifacts.</p>
+            
+            <div class="skills-list">
+                <span class="skill-tag">Computer Vision</span>
+                <span class="skill-tag">Deep Learning</span>
+                <span class="skill-tag">PyTorch</span>
+                <span class="skill-tag">TensorFlow</span>
+                <span class="skill-tag">OpenCV</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Digital Humanities</span>
+                <span class="skill-tag">C++</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Previous research section remains the same -->
+    <section id="research">
+        <div class="container">
+            <h2>Featured Research</h2>
+            <div class="research-grid">
+                <div class="research-card">
+                    <img src="/api/placeholder/400/200" alt="Historical Ornaments" class="research-img">
+                    <div class="research-content">
+                        <h3>Historical Printed Ornaments</h3>
+                        <p>Developed dataset and tasks for analyzing historical printed ornaments, published in ICDAR 2024.</p>
+                    </div>
+                </div>
+                <div class="research-card">
+                    <img src="/api/placeholder/400/200" alt="Pattern Comparison" class="research-img">
+                    <div class="research-content">
+                        <h3>Pattern Comparison</h3>
+                        <p>Created one-to-many pattern comparison system combining fully-connected autoencoder with spatial transformer.</p>
+                    </div>
+                </div>
+                <div class="research-card">
+                    <img src="/api/placeholder/400/200" alt="Rotation-Equivariant Networks" class="research-img">
+                    <div class="research-content">
+                        <h3>Rotation-Equivariant Networks</h3>
+                        <p>Developed novel approach for making Spatial Transformer Networks rotation-equivariant for unsupervised object detection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New summer schools section -->
+    <section id="summer-schools">
+        <div class="container">
+            <h2>Summer Schools</h2>
+            <div class="summer-school-grid">
+                <div class="summer-school-card">
+                    <img src="/api/placeholder/400/200" alt="DeepMind ProbAI" class="summer-school-img">
+                    <div class="summer-school-content">
+                        <h3>Google DeepMind ProbAI Summer School</h3>
+                        <p>NTNU, Trondheim, Norway (June 2023)</p>
+                        <ul>
+                            <li>Advanced probabilistic AI techniques and generative modeling</li>
+                            <li>Presented poster on historical document analysis</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="summer-school-card">
+                    <img src="/api/placeholder/400/200" alt="GeMSS" class="summer-school-img">
+                    <div class="summer-school-content">
+                        <h3>Generative Modelling Summer School (GeMSS)</h3>
+                        <p>TU Eindhoven, DTU, Inria (June 2024)</p>
+                        <ul>
+                            <li>Advanced methods in generative modeling and variational inference</li>
+                            <li>Presented poster on applications in digital humanities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Previous publications section remains the same -->
+    <section id="publications">
+        <div class="container">
+            <h2>Selected Publications</h2>
+            <div class="publication-item">
+                <h3>Historical Printed Ornaments: Dataset and Tasks</h3>
+                <p>Published in International Conference on Document Analysis and Recognition (ICDAR) 2024</p>
+            </div>
+            <div class="publication-item">
+                <h3>One-to-many pattern comparison combining fully-connected autoencoder with spatial transformer</h3>
+                <p>Preprint available at Research Square, 2023</p>
+            </div>
+            <div class="publication-item">
+                <h3>Making Spatial Transformer Networks Rotation-Equivariant</h3>
+                <p>Submitted to ICML 2025</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Previous contact section remains the same -->
+    <section id="contact">
+        <div class="container">
+            <h2>Contact</h2>
+            <p>Email: sayan.kumar.chaki@univ-st-etienne.fr</p>
+            <p>Alternative: sayan.chaki@inria.fr</p>
+            <p>Phone: +33 768753462</p>
+        </div>
+    </section>
+</body>
+</html>
