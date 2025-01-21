@@ -1,266 +1,602 @@
 <!DOCTYPE html>
-<html lang="en">
-<!-- Previous head section remains the same -->
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayan K Chaki - Computer Vision Scientist</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <title>Sayan K Chaki - Portfolio</title>
     <style>
-        /* Previous styles remain the same */
-        :root {
-            --primary-color: #1a365d;
-            --secondary-color: #2b6cb0;
-            --text-color: #2d3748;
-            --light-bg: #f7fafc;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
         }
 
-        header {
-            background: var(--primary-color);
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+        .btn-secondary {
+            background: #666;
             color: white;
-            padding: 3rem 0;
-            text-align: center;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+        .loading-text {
+            color: #60A5FA;
+            font-size: 24px;
+            margin-bottom: 40px;
+            letter-spacing: 3px;
+            opacity: 0;
+            animation: fadeInOut 2s forwards;
         }
-
-        .profile-img {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin: 2rem 0;
-            object-fit: cover;
-        }
-
-        section {
-            padding: 4rem 0;
-        }
-
-        section:nth-child(even) {
-            background: var(--light-bg);
-        }
-
-        h1, h2, h3 {
-            margin-bottom: 1rem;
-        }
-
-        .research-grid, .summer-school-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .research-card, .summer-school-card {
+        .bio-card {
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 40px 30px 30px;
+            margin: 20px auto 40px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+    @import url('https://fonts.cdnjs.com/css2?family=Playfair+Display:wght@700&display=swap');
+
+    .quote-mark {
+        position: absolute;
+        top: -40px;
+        left: 30px;
+        font-size: 140px;
+        color: #4a90e2;
+        font-family: 'Playfair Display', Georgia, serif;
+        height: 60px;
+        line-height: 1;
+        opacity: 0.15;
+        transform: rotate(8deg);
+        text-shadow: 2px 2px 4px rgba(74, 144, 226, 0.2);
+        font-style: italic;
+    }
+
+    /* Add a subtle animation on hover */
+    .bio-card:hover .quote-mark {
+        transform: rotate(30deg);
+        transition: transform 0.2s ease;
+    }
+        .subtitle {
+            font-size: 20px;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+            position: relative;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            transform: translateY(-20px);
             transition: transform 0.3s ease;
         }
 
-        .research-card:hover, .summer-school-card:hover {
-            transform: translateY(-5px);
+        .modal.show .modal-content {
+            transform: translateY(0);
         }
 
-        .research-img, .summer-school-img {
+        .neural-network {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.8s ease;
+        }
+
+        .neural-network.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        .main-content {
+            display: none;
+            min-height: 100vh;
+            text-align: center;
+            padding-top: 10vh;
+            background: #f5f5f5;
+            position: relative;
+        }
+
+        .main-content.show {
+            display: block;
+            animation: fadeIn 1s ease;
+        }
+
+        .convolution-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            height: 100%;
+            opacity: 0.1;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .research-content, .summer-school-content {
-            padding: 1.5rem;
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
         }
 
-        .skills-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
+        .grid {
+            fill: #ddd;
+            transition: fill 0.5s ease;
         }
 
-        .skill-tag {
-            background: var(--secondary-color);
+        .grid.active {
+            fill: #32CD32;
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #4a90e2;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
         }
 
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1rem;
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        .social-links a {
-            color: white;
-            font-size: 1.5rem;
-            transition: color 0.3s ease;
+        .section {
+            display: none;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: left;
         }
 
-        .social-links a:hover {
-            color: #63b3ed;
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
         }
 
-        .publication-item {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .node {
+            fill: #4B5563;
+            transition: fill 0.3s;
+        }
+
+        .node.active {
+            fill: #60A5FA;
+        }
+
+        .connection {
+            stroke: #60A5FA;
+            stroke-width: 1;
+            opacity: 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        .experience-item, .research-card {
+            margin-bottom: 20px;
+            padding: 20px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            
-            section {
-                padding: 2rem 0;
-            }
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        h2 { color: #333; margin-bottom: 20px; }
+        h3 { color: #4a90e2; margin-bottom: 10px; }
+
+        a {
+            color: #4a90e2;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #357abd;
         }
     </style>
 </head>
 <body>
-    <!-- Previous header section remains the same -->
-    <header>
-        <div class="container">
-            <img src="/api/placeholder/200/200" alt="Sayan K Chaki" class="profile-img">
+    <div class="loading-screen" id="loading">
+        <div class="loading-text">
+            Loading<span class="loading-dots"></span>
+        </div>
+        <div class="neural-network" id="network">
+            <svg width="400" height="200" viewBox="0 0 400 200">
+                <!-- Input Layer -->
+                <circle class="node" cx="50" cy="50" r="10" />
+                <circle class="node" cx="50" cy="90" r="10" />
+                <circle class="node" cx="50" cy="130" r="10" />
+                <circle class="node" cx="50" cy="170" r="10" />
+                
+                <!-- Hidden Layer -->
+                <circle class="node" cx="200" cy="70" r="10" />
+                <circle class="node" cx="200" cy="110" r="10" />
+                <circle class="node" cx="200" cy="150" r="10" />
+                
+                <!-- Output Layer -->
+                <circle class="node" cx="350" cy="110" r="10" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="main-content" id="main">
+        <div class="convolution-bg">
+            <svg width="100%" height="100%">
+                <defs>
+                    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+                        <rect class="grid" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="33" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="66" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="33" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                        <rect class="grid" x="66" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+        <div class="content">
             <h1>Sayan K Chaki</h1>
-            <p>Computer Vision Scientist | Digital Humanities Researcher</p>
-            <div class="social-links">
-                <a href="https://linkedin.com/in/sayan-chaki-vision/" target="_blank"><i class="fab fa-linkedin"></i></a>
-                <a href="https://github.com/SayanChaki" target="_blank"><i class="fab fa-github"></i></a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Previous about section remains the same -->
-    <section id="about">
-        <div class="container">
-            <h2>About Me</h2>
-            <p>Final-year doctoral candidate specializing in computer vision and digital humanities, with expertise in unsupervised analysis of historical ornaments. I have collaborated with prestigious institutions including University of Oxford's VGG, IMAGINE École des Ponts ParisTech, and TU Vienna on computational analysis of cultural artifacts.</p>
+    <div class="bio-card">
+        <div class="quote-mark">"</div>
+        <p class="subtitle">Final-year doctoral candidate specialising in computer vision and digital humanities, with expertise in unsupervised
+        analysis of historical ornaments. Collaborated with University of Oxford's VGG, IMAGINE École des Ponts
+        ParisTech, and TU Vienna on computational analysis of cultural artefacts.</p>
+    </div>
             
-            <div class="skills-list">
-                <span class="skill-tag">Computer Vision</span>
-                <span class="skill-tag">Deep Learning</span>
-                <span class="skill-tag">PyTorch</span>
-                <span class="skill-tag">TensorFlow</span>
-                <span class="skill-tag">OpenCV</span>
-                <span class="skill-tag">Python</span>
-                <span class="skill-tag">Digital Humanities</span>
-                <span class="skill-tag">C++</span>
+            <div>
+                <button class="btn" onclick="showSection('experience')">Experience</button>
+                <button class="btn" onclick="showSection('research')">Research</button>
+                <button class="btn" onclick="showSection('teaching')">Teaching</button>
+                <button class="btn" onclick="showSection('summer-schools')">Summer Schools</button>
+                <button class="btn btn-secondary" onclick="showModal('contact')">Contact</button>
             </div>
-        </div>
-    </section>
 
-    <!-- Previous research section remains the same -->
-    <section id="research">
-        <div class="container">
-            <h2>Featured Research</h2>
-            <div class="research-grid">
-                <div class="research-card">
-                    <img src="/api/placeholder/400/200" alt="Historical Ornaments" class="research-img">
-                    <div class="research-content">
-                        <h3>Historical Printed Ornaments</h3>
-                        <p>Developed dataset and tasks for analyzing historical printed ornaments, published in ICDAR 2024.</p>
-                    </div>
-                </div>
-                <div class="research-card">
-                    <img src="/api/placeholder/400/200" alt="Pattern Comparison" class="research-img">
-                    <div class="research-content">
-                        <h3>Pattern Comparison</h3>
-                        <p>Created one-to-many pattern comparison system combining fully-connected autoencoder with spatial transformer.</p>
-                    </div>
-                </div>
-                <div class="research-card">
-                    <img src="/api/placeholder/400/200" alt="Rotation-Equivariant Networks" class="research-img">
-                    <div class="research-content">
-                        <h3>Rotation-Equivariant Networks</h3>
-                        <p>Developed novel approach for making Spatial Transformer Networks rotation-equivariant for unsupervised object detection.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        <div class="content">
+        
 
-    <!-- New summer schools section -->
-    <section id="summer-schools">
-        <div class="container">
-            <h2>Summer Schools</h2>
-            <div class="summer-school-grid">
-                <div class="summer-school-card">
-                    <img src="/api/placeholder/400/200" alt="DeepMind ProbAI" class="summer-school-img">
-                    <div class="summer-school-content">
-                        <h3>Google DeepMind ProbAI Summer School</h3>
-                        <p>NTNU, Trondheim, Norway (June 2023)</p>
-                        <ul>
-                            <li>Advanced probabilistic AI techniques and generative modeling</li>
-                            <li>Presented poster on historical document analysis</li>
-                        </ul>
-                    </div>
+            <div id="experience" class="section">
+                <h2>Professional Experience</h2>
+                <div class="experience-item">
+                    <h3>PhD Scholar in Image, Vision, and Signal Processing</h3>
+                    <p><strong>Inria, Laboratoire Hubert Curien | Sep 2022– Present</strong></p>
+                    <ul>
+                        <li>Developing an equivariant model for unsupervised detection and segmentation of ornaments from historical manuscripts</li>
+                        <li>Affine transformation invariance with lowdata solutions</li>
+                        <li>Equivariance principles for model robustness in ANR project "Rey's Ornament Image Investigation"</li>
+                    </ul>
                 </div>
-                <div class="summer-school-card">
-                    <img src="/api/placeholder/400/200" alt="GeMSS" class="summer-school-img">
-                    <div class="summer-school-content">
-                        <h3>Generative Modelling Summer School (GeMSS)</h3>
-                        <p>TU Eindhoven, DTU, Inria (June 2024)</p>
-                        <ul>
-                            <li>Advanced methods in generative modeling and variational inference</li>
-                            <li>Presented poster on applications in digital humanities</li>
-                        </ul>
-                    </div>
+                <div class="experience-item">
+                    <h3>Research (Master) Intern</h3>
+                    <p><strong>Laboratoire Hubert Curien | Mar 2022– Jul 2022</strong></p>
+                    <ul>
+                        <li>Developed Spatial Transformer AutoEncoder for anomaly segmentation</li>
+                        <li>Compiled benchmark vignettes dataset from ornaments in books</li>
+                    </ul>
+                </div>
+                <div class="experience-item">
+                    <h3>Software Developer Intern</h3>
+                    <p><strong>IBM India & KLA Tencor | May 2021– Jul 2021</strong></p>
+                    <ul>
+                        <li>Developed anomaly segmentation algorithms for 3D fault detection</li>
+                        <li>Created an integrated crossplatform ecosystem using React</li>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
+            <div id="contactModal" class="modal">
+            <div class="modal-content">
+              <span class="close-btn" onclick="hideModal('contact')">&times;</span>
+               <h2>Contact Information</h2>
+                <p>Email: sayan.chaki@inria.fr; sayan.kumar.chaki@univ-st-etienne.fr</p>
+                <p>Phone: +33 768753462</p>
+                <p>LinkedIn: linkedin.com/in/sayan-chaki-vision/</p>
+                <p>GitHub: github.com/SayanChaki</p>
+            
+            </div>
+            </div>
+            <div id="research" class="section">
+                <h2>Research & Publications</h2>
+                <div class="research-grid">
+                    <div class="research-card">
+                        <div class="research-thumbnail">
+                            <img src="/api/placeholder/300/200" alt="Rotation Equivariant Detector" />
+                        </div>
+                        <div class="research-content">
+                            <h3>Making Spatial Transformer Networks Rotation-Equivariant:
+Variational Autoencoding to Object Detection</h3>
+                            <p>Submitted to ICML 2025</p>
+                            <p>Led a team of researchers in addressing limitations in 3D reconstructions and modelling of byzantine seals</p>
+                        </div>
+                    </div>
+                    <div class="research-card">
+                        <div class="research-thumbnail">
+                            <img src="/api/placeholder/300/200" alt="Historical Ornaments" />
+                        </div>
+                        <div class="research-content">
+                            <h3>Historical Printed Ornaments Dataset and Tasks -</h3>
+                            <p> Published in ICDAR 2024</p>
+                            <a href="https://dx.doi.org/10.1007/978-3-031-70543-4_15" target="_blank">View Paper</a>
+                        </div>
+                    </div>
+                    <div class="research-card">
+                        <div class="research-thumbnail">
+                            <img src="/api/placeholder/300/200" alt="Pattern Comparison" />
+                        </div>
+                        <div class="research-content">
+                            <h3>Anomaly localization and Pattern Comparison</h3>
+                            <p>One-to-many pattern comparison combining fully-connected
+autoencoder with spatial transformer for ornament investigation</p>
+                            <a href="https://doi.org/10.21203/rs.3.rs-3573134/v1" target="_blank">View Preprint</a>
+                        </div>
+                    </div>
+                    <div class="research-card">
+                        <div class="research-thumbnail">
+                            <img src="/api/placeholder/300/200" alt="University of Oxford Talk" />
+                        </div>
+                        <div class="research-content">
+                            <h3>Computing the Early Page in Modern Europe</h3>
+                            <p>University of Oxford - March 2024</p>
+                            <p>Invited talk on unsupervised decomposition of historical document elements, focused on early page structures of ancient
+European books</p>
+                        </div>
 
-    <!-- Previous publications section remains the same -->
-    <section id="publications">
-        <div class="container">
-            <h2>Selected Publications</h2>
-            <div class="publication-item">
-                <h3>Historical Printed Ornaments: Dataset and Tasks</h3>
-                <p>Published in International Conference on Document Analysis and Recognition (ICDAR) 2024</p>
+                </div>
+                
+                    <div class="research-card">
+                        <div class="research-thumbnail">
+                            <img src="/api/placeholder/300/200" alt="TU Vienna Hackathon" />
+                        </div>
+                        <div class="research-content">
+                            <h3>Intermediality and Computational Humanities Hackathon</h3>
+                            <p>University of Vienna - November 2024</p>
+                            <p>Led a team of researchers in addressing limitations in 3D reconstructions and modelling of byzantine seals</p>
+                        </div>
+                    </div>
+                
+                           
             </div>
-            <div class="publication-item">
-                <h3>One-to-many pattern comparison combining fully-connected autoencoder with spatial transformer</h3>
-                <p>Preprint available at Research Square, 2023</p>
             </div>
-            <div class="publication-item">
-                <h3>Making Spatial Transformer Networks Rotation-Equivariant</h3>
-                <p>Submitted to ICML 2025</p>
+            <div id="teaching" class="section">
+                <h2>Teaching Experience</h2>
+                <div class="experience-item">
+                    <h3>Introduction to Machine Learning</h3>
+                    <p><strong>Institut d'Optique Graduate School (24 hrs)</strong></p>
+                    <ul>
+                        <li>Supervised/unsupervised learning, neural networks (CNNs, GANs, VAEs)</li>
+                        <li>Model evaluation with practical Python implementations</li>
+                    </ul>
+                </div>
+                <div class="experience-item">
+                    <h3>Introduction to Python</h3>
+                    <p><strong>Institut d'Optique Graduate School (24 hrs)</strong></p>
+                    <ul>
+                        <li>Python basics, data structures, libraries (NumPy, pandas)</li>
+                        <li>Applications in data analysis and machine learning</li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Previous contact section remains the same -->
-    <section id="contact">
-        <div class="container">
-            <h2>Contact</h2>
-            <p>Email: sayan.kumar.chaki@univ-st-etienne.fr</p>
-            <p>Alternative: sayan.chaki@inria.fr</p>
-            <p>Phone: +33 768753462</p>
+            <div id="summer-schools" class="section">
+                <h2>Summer Schools</h2>
+                <div class="experience-item">
+                    <h3>Google DeepMind ProbAI Summer School</h3>
+                    <p><strong>NTNU, Trondheim, Norway | June 2023</strong></p>
+                    <ul>
+                        <li>Advanced probabilistic AI techniques in generative modeling</li>
+                        <li>Presented poster on probabilistic methods in document analysis</li>
+                    </ul>
+                </div>
+                <div class="experience-item">
+                    <h3>Generative Modelling Summer School (GeMSS)</h3>
+                    <p><strong>TU Eindhoven, DTU, Inria | June 2024</strong></p>
+                    <ul>
+                        <li>Advanced methods in generative modeling and variational inference</li>
+                        <li>Presented poster on applications in digital humanities</li>
+                    </ul>
+                </div>
+
+                
+            </div>
+            </div>
         </div>
-    </section>
+    </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.getElementById('network').classList.add('show');
+                startNeuralAnimation();
+            }, 1000);
+        });
+
+        function startNeuralAnimation() {
+            const nodes = document.querySelectorAll('.node');
+            let step = 0;
+            
+            function animateNodes() {
+                if (step === 0) {
+                    nodes.forEach((node, i) => {
+                        if (i < 4) node.classList.add('active');
+                    });
+                    createConnections(0, 4, 4, 7);
+                } else if (step === 1) {
+                    nodes.forEach((node, i) => {
+                        if (i >= 4 && i < 7) node.classList.add('active');
+                    });
+                    createConnections(4, 7, 7, 8);
+                } else if (step === 2) {
+                    nodes[7].classList.add('active');
+                } else if (step === 3) {
+                    finishLoading();
+                    return;
+                }
+                step++;
+                setTimeout(animateNodes, 800);
+            }
+
+            function createConnections(startIdx, endIdx, targetStartIdx, targetEndIdx) {
+                const svg = document.querySelector('.neural-network svg');
+                for (let i = startIdx; i < endIdx; i++) {
+                    for (let j = targetStartIdx; j < targetEndIdx; j++) {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        const node1 = nodes[i];
+                        const node2 = nodes[j];
+                        line.setAttribute('x1', node1.getAttribute('cx'));
+                        line.setAttribute('y1', node1.getAttribute('cy'));
+                        line.setAttribute('x2', node2.getAttribute('cx'));
+                        line.setAttribute('y2', node2.getAttribute('cy'));
+                        line.setAttribute('class', 'connection');
+                        svg.insertBefore(line, svg.firstChild);
+                    }
+                }
+            }
+
+            animateNodes();
+        }
+
+        function finishLoading() {
+            const loading = document.getElementById('loading');
+            const main = document.getElementById('main');
+            
+            loading.style.opacity = '0';
+            setTimeout(() => {
+                loading.style.display = 'none';
+                main.classList.add('show');
+                startGridAnimation();
+            }, 1000);
+        }
+
+        function startGridAnimation() {
+            const grids = document.querySelectorAll('.grid');
+            let activeIndex = -1;
+
+            function activateRandomGrid() {
+                if (activeIndex !== -1) {
+                    grids[activeIndex].classList.remove('active');
+                }
+                activeIndex = Math.floor(Math.random() * grids.length);
+                grids[activeIndex].classList.add('active');
+                setTimeout(activateRandomGrid, 800);
+            }
+
+            activateRandomGrid();
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Fallback in case loading takes too long
+        setTimeout(() => {
+            finishLoading();
+        }, 8000);
+        function showModal(type) {
+            const modal = document.getElementById(type + 'Modal');
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function hideModal(type) {
+            const modal = document.getElementById(type + 'Modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+    </script>
 </body>
 </html>
