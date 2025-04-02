@@ -430,7 +430,7 @@
           const amount = parseFloat(fields[amountIndex]);
           
           if (name && !isNaN(amount) && amount > 0) {
-            contributors.push({ name });
+            contributors.push({ name, amount });
           }
         }
       }
@@ -449,7 +449,7 @@
       // Update progress bar
       const percentage = Math.min((currentAmount / goalAmount) * 100, 100);
       progressBar.style.width = percentage + '%';
-      progressAmount.textContent = '$' + currentAmount.toFixed(2);
+      progressAmount.textContent = '€' + currentAmount.toFixed(2);
 
       
       // Display contributors
@@ -563,8 +563,10 @@
     
     function loadSampleData() {
       // Sample data to use if CSV loading fails
-            const sampleCSV = `name,amount,date,goal
-            John,25,2023-04-01,200`;
+      const sampleCSV = `name,amount,date,goal,
+      Sandrine,10,02-04-2025,200
+      Valentin,15,02-04-2025,200
+`;
       
       console.log("Loading sample data due to CSV loading failure");
       loadingIndicator.textContent = "Using sample data...";
