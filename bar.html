@@ -430,7 +430,7 @@
           const amount = parseFloat(fields[amountIndex]);
           
           if (name && !isNaN(amount) && amount > 0) {
-            contributors.push({ name, amount });
+            contributors.push({ name });
           }
         }
       }
@@ -457,7 +457,7 @@
       contributors.forEach((contributor, index) => {
         const contributorElement = document.createElement('div');
         contributorElement.className = 'contributor';
-        contributorElement.textContent = `${contributor.name} ($${contributor.amount.toFixed(2)})`;
+        contributorElement.textContent = `${contributor.name}`;
         contributorList.appendChild(contributorElement);
         
         // Add delay for staggered animation
@@ -563,7 +563,8 @@
     
     function loadSampleData() {
       // Sample data to use if CSV loading fails
-      const sampleCSV = `name,amount,date,goal
+      const sampleCSV = `name,amount,date,goal,
+      Sandrine,10,02-04-2025,200
 `;
       
       console.log("Loading sample data due to CSV loading failure");
