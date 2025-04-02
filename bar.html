@@ -139,25 +139,6 @@
       text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
     }
     
-    .button {
-      background-color: var(--highlight);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 3px 10px rgba(157, 140, 210, 0.3);
-    }
-    
-    .button:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 5px 15px rgba(157, 140, 210, 0.5);
-      background-color: #b66ed4;
-    }
-    
     .contributors {
       margin-top: 40px;
     }
@@ -184,60 +165,6 @@
       box-shadow: 0 5px 15px rgba(157, 140, 210, 0.3);
       background-color: var(--highlight);
       color: white;
-    }
-    
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 2;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      animation: fadeIn 0.3s;
-    }
-    
-    .modal-content {
-      background-color: white;
-      margin: 15% auto;
-      padding: 30px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-      box-shadow: 0 5px 25px rgba(157, 140, 210, 0.4);
-      animation: modalDrop 0.5s ease forwards;
-    }
-    
-    .close {
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: 
-   
-pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .close:hover {
-      color: var(--highlight);
-      transform: rotate(90deg);
-    }
-    
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid var(--secondary);
-      border-radius: 5px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-    
-    input:focus {
-      border-color: var(--highlight);
-      box-shadow: 0 0 8px rgba(196, 144, 228, 0.4);
-      outline: none;
     }
     
     /* Balloons */
@@ -328,6 +255,20 @@ pointer;
       border-radius: 5px;
     }
     
+    .goal-amount {
+      text-align: center;
+      margin-top: 5px;
+      font-weight: bold;
+      color: var(--dark);
+    }
+
+    .loading-indicator {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: var(--dark);
+    }
+    
     /* Animations */
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
@@ -387,11 +328,6 @@ pointer;
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     
-    @keyframes modalDrop {
-      0% { opacity: 0; transform: translateY(-100px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -441,95 +377,99 @@ pointer;
           </div>
         </div>
       </div>
-      
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="button" id="contribute-button">Add to Gift Pot</button>
-      </div>
+      <div class="goal-amount" id="goal-text">Goal: Lisbon</div>
       
       <div class="contributors">
         <h3>Contributors:</h3>
+        <div id="loading-indicator" class="loading-indicator">Loading contributors...</div>
         <div class="contributor-list" id="contributor-list">
-          <!-- Contributors will be added here -->
+          <!-- Contributors will be loaded from CSV -->
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Modal for contribution -->
-  <div id="contributionModal" class="modal">
-    <div class="modal-content">
-      <span class="close">×</span>
-      <h2>Add Your Contribution</h2>
-      <form id="contribution-form">
-        <input type="text" id="name" placeholder="Your Name" required>
-        <input type="number" id="amount" placeholder="Amount ($)" min="1" required>
-        <button type="submit" class="button" style="width: 100%; margin-top: 10px;">Contribute</button>
-      </form>
-    </div>
-  </div>
-
   <script>
     // Variables
     let currentAmount = 0;
-    const goalAmount = 200;
+    let goalAmount = 200; // Default goal
     const contributors = [];
     
     // DOM elements
     const progressBar = document.getElementById('progress-bar');
     const progressAmount = document.getElementById('progress-amount');
+    const goalText = document.getElementById('goal-text');
     const contributorList = document.getElementById('contributor-list');
-    const contributeButton = document.getElementById('contribute-button');
-    const modal = document.getElementById('contributionModal');
-    const closeButton = document.querySelector('.close');
-    const contributionForm = document.getElementById('contribution-form');
+    const loadingIndicator = document.getElementById('loading-indicator');
     
-    // Event listeners
-    contributeButton.addEventListener('click', openModal);
-    closeButton.addEventListener('click', closeModal);
-    window.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
-    contributionForm.addEventListener('submit', handleContribution);
+    // CSV file URL - change this to your external CSV file path
+    const csvFileUrl = '/home/sayanchaki/Documents/Final_year/TARGET-VAE-main/contributions.csv';
     
     // Functions
-    function openModal() {
-      modal.style.display = 'block';
-    }
-    
-    function closeModal() {
-      modal.style.display = 'none';
-      contributionForm.reset();
-    }
-    
-    function handleContribution(event) {
-      event.preventDefault();
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      const headers = lines[0].split(',');
       
-      const name = document.getElementById('name').value;
-      const amount = parseInt(document.getElementById('amount').value);
+      // Process the header line to find relevant columns
+      const nameIndex = headers.indexOf('name');
+      const amountIndex = headers.indexOf('amount');
+      const goalIndex = headers.findIndex(header => header.toLowerCase().includes('goal'));
       
-      if (name && amount > 0) {
-        addContribution(name, amount);
-        createFireworks(10);
-        createStreamers(5);
-        closeModal();
+      // Set goal amount if found in CSV
+      if (goalIndex !== -1 && lines.length > 1) {
+        const goalValue = parseFloat(lines[1].split(',')[goalIndex]);
+        if (!isNaN(goalValue) && goalValue > 0) {
+          goalAmount = goalValue;
+        }
       }
+      
+      // Parse contribution data
+      for (let i = 1; i < lines.length; i++) {
+        const fields = lines[i].split(',');
+        if (fields.length > 1) {
+          const name = fields[nameIndex];
+          const amount = parseFloat(fields[amountIndex]);
+          
+          if (name && !isNaN(amount) && amount > 0) {
+            contributors.push({ name, amount });
+          }
+        }
+      }
+      
+      // Hide loading indicator
+      loadingIndicator.style.display = 'none';
+      
+      // Update UI with the parsed data
+      updateUI();
     }
     
-    function addContribution(name, amount) {
-      currentAmount += amount;
+    function updateUI() {
+      // Calculate current amount
+      currentAmount = contributors.reduce((total, contributor) => total + contributor.amount, 0);
       
+      // Update progress bar
       const percentage = Math.min((currentAmount / goalAmount) * 100, 100);
       progressBar.style.width = percentage + '%';
-      progressAmount.textContent = '$' + currentAmount;
+      progressAmount.textContent = '$' + currentAmount.toFixed(2);
+
       
-      contributors.push({ name, amount });
+      // Display contributors
+      contributorList.innerHTML = '';
+      contributors.forEach((contributor, index) => {
+        const contributorElement = document.createElement('div');
+        contributorElement.className = 'contributor';
+        contributorElement.textContent = `${contributor.name} ($${contributor.amount.toFixed(2)})`;
+        contributorList.appendChild(contributorElement);
+        
+        // Add delay for staggered animation
+        setTimeout(() => {
+          contributorElement.style.animation = 'addContributor 0.8s ease-in forwards';
+        }, 100 * index);
+      });
       
-      const contributorElement = document.createElement('div');
-      contributorElement.className = 'contributor';
-      contributorElement.textContent = `${name} ($${amount})`;
-      contributorList.appendChild(contributorElement);
+      // Create visual effects
+      createFireworks(5);
+      createStreamers(3);
     }
     
     function createBalloons() {
@@ -603,6 +543,37 @@ pointer;
       document.querySelector('.container').appendChild(gift);
     }
     
+    // Load data from external CSV
+    function loadContributionsFromCSV() {
+      fetch(csvFileUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load contributions CSV');
+          }
+          return response.text();
+        })
+        .then(csvData => {
+          parseCSV(csvData);
+        })
+        .catch(error => {
+          console.error('Error loading CSV:', error);
+          // Load sample data if CSV fails to load
+          loadSampleData();
+        });
+    }
+    
+    function loadSampleData() {
+      // Sample data to use if CSV loading fails
+      const sampleCSV = `name,amount,date,goal
+`;
+      
+      console.log("Loading sample data due to CSV loading failure");
+      loadingIndicator.textContent = "Using sample data...";
+      
+      // Parse the sample data
+      parseCSV(sampleCSV);
+    }
+    
     // Initialize decorations
     function initializeDecorations() {
       createBalloons();
@@ -610,22 +581,23 @@ pointer;
       createGiftBox();
       
       setInterval(() => {
-        if (Math.random() > 0.8) {
-          createFireworks(3);
+        if (Math.random() > 0.9) {
+          createFireworks(2);
         }
-      }, 3000);
+      }, 5000);
       
       setInterval(() => {
-        if (Math.random() > 0.9) {
-          createStreamers(2);
+        if (Math.random() > 0.95) {
+          createStreamers(1);
         }
-      }, 4000);
+      }, 8000);
     }
     
     // Start everything
-    initializeDecorations();
-    createFireworks(5);
-    createStreamers(3);
+    window.addEventListener('load', () => {
+      initializeDecorations();
+      loadContributionsFromCSV();
+    });
   </script>
 </body>
 </html>
