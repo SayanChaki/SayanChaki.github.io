@@ -1,602 +1,1991 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sayan K Chaki - Portfolio</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sayan K Chaki — AI Researcher & Artist of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ==============================
+   ROOT & RESET
+================================*/
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#1a0a00;
+  --canvas:#f7f0e3;
+  --ochre:#c8860a;
+  --gold:#e8a520;
+  --wheat:#f2d06b;
+  --prussian:#1a3a5c;
+  --cobalt:#2455a4;
+  --cerulean:#3a7bd5;
+  --sky:#89c4e1;
+  --vermillion:#c0392b;
+  --crimson:#8b0000;
+  --sage:#5a7a4a;
+  --olive:#7a8c3a;
+  --ivory:#fdf6e3;
+  --shadow:rgba(26,10,0,0.6);
+  --glow:rgba(232,165,32,0.4);
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+  background:var(--ink);
+  color:var(--canvas);
+  font-family:'Spectral',Georgia,serif;
+  overflow-x:hidden;
+  cursor:none;
+}
 
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 1s ease;
-        }
-        .btn-secondary {
-            background: #666;
-            color: white;
-        }
+/* ==============================
+   CUSTOM CURSOR — PAINTBRUSH
+================================*/
+#brush-cursor{
+  position:fixed;z-index:99999;pointer-events:none;
+  width:6px;height:32px;
+  background:linear-gradient(to bottom, #8b4513 0%, #c8860a 40%, var(--gold) 100%);
+  border-radius:1px 1px 4px 4px;
+  transform:translate(-3px,-2px) rotate(-35deg);
+  transform-origin:top center;
+  transition:transform 0.1s;
+  filter:drop-shadow(0 0 6px var(--gold));
+}
+#brush-cursor::after{
+  content:'';
+  position:absolute;bottom:-8px;left:-2px;
+  width:10px;height:10px;border-radius:50% 50% 60% 60%;
+  background:radial-gradient(circle at 40% 40%, var(--cobalt) 0%, var(--prussian) 60%, transparent 100%);
+  filter:blur(1px);
+}
+#paint-trail{
+  position:fixed;z-index:99998;pointer-events:none;
+}
 
-        .loading-text {
-            color: #60A5FA;
-            font-size: 24px;
-            margin-bottom: 40px;
-            letter-spacing: 3px;
-            opacity: 0;
-            animation: fadeInOut 2s forwards;
-        }
-        .bio-card {
-            background: white;
-            border-radius: 15px;
-            padding: 40px 30px 30px;
-            margin: 20px auto 40px;
-            max-width: 800px;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
+/* ==============================
+   LOADING SCREEN — NEURAL PASS
+================================*/
+#loader{
+  position:fixed;inset:0;z-index:99990;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2rem;
+  transition:opacity 0.8s ease, visibility 0.8s ease;
+}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 
-    @import url('https://fonts.cdnjs.com/css2?family=Playfair+Display:wght@700&display=swap');
+#neural-canvas{
+  width:min(600px, 90vw);
+  height:300px;
+}
 
-    .quote-mark {
-        position: absolute;
-        top: -40px;
-        left: 30px;
-        font-size: 140px;
-        color: #4a90e2;
-        font-family: 'Playfair Display', Georgia, serif;
-        height: 60px;
-        line-height: 1;
-        opacity: 0.15;
-        transform: rotate(8deg);
-        text-shadow: 2px 2px 4px rgba(74, 144, 226, 0.2);
-        font-style: italic;
-    }
+.loader-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.2rem,3vw,1.8rem);
+  color:var(--wheat);
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  opacity:0;
+  animation:fadeIn 1s 0.5s forwards;
+}
+.loader-subtitle{
+  font-family:'Courier Prime',monospace;
+  font-size:0.75rem;
+  color:var(--gold);
+  letter-spacing:0.3em;
+  opacity:0;
+  animation:fadeIn 1s 1s forwards;
+}
+.loader-bar-wrap{
+  width:min(400px,80vw);
+  height:2px;
+  background:rgba(255,255,255,0.1);
+  border-radius:2px;
+  overflow:hidden;
+}
+.loader-bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(to right, var(--cobalt), var(--gold), var(--vermillion));
+  border-radius:2px;
+  transition:width 0.1s linear;
+}
+#loader-text{
+  font-family:'Courier Prime',monospace;
+  font-size:0.65rem;
+  color:rgba(255,255,255,0.4);
+  letter-spacing:0.2em;
+  min-height:1em;
+}
 
-    /* Add a subtle animation on hover */
-    .bio-card:hover .quote-mark {
-        transform: rotate(30deg);
-        transition: transform 0.2s ease;
-    }
-        .subtitle {
-            font-size: 20px;
-            color: #666;
-            line-height: 1.6;
-            margin: 0;
-            position: relative;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1001;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+@keyframes fadeIn{to{opacity:1;}}
 
-        .modal.show {
-            opacity: 1;
-        }
+/* ==============================
+   IMPRESSIONIST CANVAS BACKGROUND
+================================*/
+#impasto-canvas{
+  position:fixed;inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:0.18;
+}
 
-        .modal-content {
-            position: relative;
-            background: white;
-            margin: 5% auto;
-            padding: 20px;
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 10px;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
+/* ==============================
+   NAVIGATION
+================================*/
+nav{
+  position:fixed;top:0;width:100%;z-index:1000;
+  padding:1.2rem 4rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to bottom, rgba(26,10,0,0.95) 0%, transparent 100%);
+  backdrop-filter:blur(8px);
+}
+.nav-logo{
+  font-family:'DM Serif Display',serif;
+  font-size:1.1rem;
+  color:var(--wheat);
+  text-decoration:none;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  position:relative;
+}
+.nav-logo::after{
+  content:'';
+  position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:linear-gradient(to right, var(--gold), transparent);
+}
+.nav-links{display:flex;gap:2.8rem;align-items:center;}
+.nav-links a{
+  font-family:'Courier Prime',monospace;
+  font-size:0.68rem;
+  color:rgba(247,240,227,0.6);
+  text-decoration:none;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  transition:color 0.3s, opacity 0.3s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';
+  position:absolute;bottom:-3px;left:0;width:0%;height:1px;
+  background:var(--gold);
+  transition:width 0.3s ease;
+}
+.nav-links a:hover{color:var(--wheat);}
+.nav-links a:hover::after{width:100%;}
 
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
+/* ==============================
+   HERO SECTION
+================================*/
+#hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
 
-        .neural-network {
-            opacity: 0;
-            transform: scale(0.95);
-            transition: all 0.8s ease;
-        }
+.hero-painting{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 50%, rgba(36,85,164,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 30%, rgba(192,57,43,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 80%, rgba(200,134,10,0.2) 0%, transparent 60%);
+  animation:paintShift 12s ease-in-out infinite alternate;
+}
 
-        .neural-network.show {
-            opacity: 1;
-            transform: scale(1);
-        }
+@keyframes paintShift{
+  0%{filter:hue-rotate(0deg) brightness(1);}
+  50%{filter:hue-rotate(8deg) brightness(1.05);}
+  100%{filter:hue-rotate(-5deg) brightness(0.95);}
+}
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
-        }
+.swirl-canvas{
+  position:absolute;inset:0;
+  pointer-events:none;
+  z-index:1;
+}
 
-        .loading-dots:after {
-            content: '.';
-            animation: dots 1.5s steps(5, end) infinite;
-        }
+.hero-content{
+  position:relative;z-index:10;
+  text-align:center;
+  max-width:900px;
+  padding:0 2rem;
+}
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60% { content: '...'; }
-            80%, 100% { content: ''; }
-        }
+.hero-eyebrow{
+  font-family:'Courier Prime',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.4em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:1.5rem;
+  opacity:0;
+  animation:heroReveal 1s 0.3s cubic-bezier(0.22,1,0.36,1) forwards;
+}
 
-        .main-content {
-            display: none;
-            min-height: 100vh;
-            text-align: center;
-            padding-top: 10vh;
-            background: #f5f5f5;
-            position: relative;
-        }
+.hero-name{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(3.5rem, 10vw, 8rem);
+  line-height:0.95;
+  color:var(--ivory);
+  margin-bottom:0.5rem;
+  opacity:0;
+  animation:heroReveal 1.2s 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+  text-shadow:
+    0 0 80px rgba(232,165,32,0.3),
+    0 2px 40px rgba(26,10,0,0.8);
+  position:relative;
+}
 
-        .main-content.show {
-            display: block;
-            animation: fadeIn 1s ease;
-        }
+.hero-name .italic{
+  font-style:italic;
+  color:var(--wheat);
+}
 
-        .convolution-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.1;
-            z-index: 0;
-            pointer-events: none;
-        }
+.hero-subtitle{
+  font-family:'Spectral',serif;
+  font-size:clamp(1rem,2.5vw,1.4rem);
+  font-style:italic;
+  color:rgba(247,240,227,0.75);
+  margin-bottom:2.5rem;
+  opacity:0;
+  animation:heroReveal 1s 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  letter-spacing:0.08em;
+}
 
-        .content {
-            position: relative;
-            z-index: 1;
-            padding: 20px;
-        }
+.hero-tags{
+  display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center;
+  margin-bottom:3rem;
+  opacity:0;
+  animation:heroReveal 1s 1.1s cubic-bezier(0.22,1,0.36,1) forwards;
+}
 
-        .grid {
-            fill: #ddd;
-            transition: fill 0.5s ease;
-        }
+.tag{
+  font-family:'Courier Prime',monospace;
+  font-size:0.6rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  padding:0.4rem 1rem;
+  border:1px solid rgba(232,165,32,0.3);
+  color:var(--wheat);
+  border-radius:2px;
+  background:rgba(26,10,0,0.4);
+  backdrop-filter:blur(4px);
+  transition:all 0.3s;
+}
+.tag:hover{
+  background:rgba(200,134,10,0.2);
+  border-color:var(--gold);
+  transform:translateY(-2px);
+}
 
-        .grid.active {
-            fill: #32CD32;
-            opacity: 0.8;
-        }
+.hero-cta{
+  display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;
+  opacity:0;
+  animation:heroReveal 1s 1.3s cubic-bezier(0.22,1,0.36,1) forwards;
+}
 
-        h1 {
-            font-size: 48px;
-            color: #333;
-            margin-bottom: 20px;
-        }
+.btn-primary{
+  font-family:'Courier Prime',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  text-decoration:none;
+  padding:0.9rem 2.5rem;
+  background:linear-gradient(135deg, var(--ochre), var(--gold));
+  color:var(--ink);
+  border-radius:2px;
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.3s, box-shadow 0.3s;
+  box-shadow:0 4px 24px rgba(200,134,10,0.4);
+}
+.btn-primary:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 40px rgba(200,134,10,0.6);
+}
 
-        .subtitle {
-            font-size: 20px;
-            color: #666;
-            max-width: 800px;
-            margin: 0 auto 30px;
-            line-height: 1.6;
-        }
+.btn-secondary{
+  font-family:'Courier Prime',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  text-decoration:none;
+  padding:0.9rem 2.5rem;
+  border:1px solid rgba(232,165,32,0.5);
+  color:var(--wheat);
+  border-radius:2px;
+  transition:all 0.3s;
+  backdrop-filter:blur(4px);
+}
+.btn-secondary:hover{
+  background:rgba(232,165,32,0.1);
+  border-color:var(--gold);
+  transform:translateY(-3px);
+}
 
-        .btn {
-            padding: 12px 24px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #4a90e2;
-            color: white;
-        }
+@keyframes heroReveal{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
 
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
+.scroll-indicator{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  opacity:0;
+  animation:heroReveal 1s 2s forwards;
+  z-index:10;
+}
+.scroll-line{
+  width:1px;height:60px;
+  background:linear-gradient(to bottom, var(--gold), transparent);
+  animation:scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse{
+  0%,100%{opacity:0.3;transform:scaleY(1);}
+  50%{opacity:1;transform:scaleY(1.1);}
+}
 
-        .section {
-            display: none;
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: left;
-        }
+/* ==============================
+   SECTION COMMON
+================================*/
+section{
+  position:relative;
+  z-index:5;
+  padding:8rem 4rem;
+}
 
-        .section.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
+.section-label{
+  font-family:'Courier Prime',monospace;
+  font-size:0.62rem;
+  letter-spacing:0.45em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:1rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.section-label::before{
+  content:'';
+  width:40px;height:1px;
+  background:var(--gold);
+  display:inline-block;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.section-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2rem,5vw,3.5rem);
+  line-height:1.1;
+  margin-bottom:3rem;
+  color:var(--ivory);
+}
 
-        .node {
-            fill: #4B5563;
-            transition: fill 0.3s;
-        }
+.section-title .italic{
+  font-style:italic;
+  color:var(--wheat);
+}
 
-        .node.active {
-            fill: #60A5FA;
-        }
+/* ==============================
+   ABOUT SECTION
+================================*/
+#about{
+  background:linear-gradient(135deg, rgba(26,58,92,0.15) 0%, transparent 60%);
+  border-top:1px solid rgba(232,165,32,0.1);
+}
 
-        .connection {
-            stroke: #60A5FA;
-            stroke-width: 1;
-            opacity: 0;
-            animation: pulse 2s infinite;
-        }
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5rem;
+  align-items:start;
+  max-width:1200px;
+  margin:0 auto;
+}
 
-        @keyframes pulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
-        }
+.about-portrait{
+  position:relative;
+}
 
-        .experience-item, .research-card {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+.portrait-frame{
+  position:relative;
+  width:100%;
+  aspect-ratio:3/4;
+  max-width:360px;
+  margin:0 auto;
+}
 
-        .research-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
+.portrait-bg{
+  position:absolute;inset:0;
+  border-radius:4px;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg, var(--prussian) 0%, var(--cobalt) 40%, var(--ochre) 80%, var(--vermillion) 100%);
+}
 
-        h2 { color: #333; margin-bottom: 20px; }
-        h3 { color: #4a90e2; margin-bottom: 10px; }
+.portrait-swirl{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 40%, rgba(247,240,227,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 70% 70%, rgba(232,165,32,0.2) 0%, transparent 50%);
+  animation:portraitSwirl 8s ease-in-out infinite alternate;
+}
 
-        a {
-            color: #4a90e2;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
+@keyframes portraitSwirl{
+  0%{transform:rotate(0deg) scale(1);}
+  100%{transform:rotate(3deg) scale(1.02);}
+}
 
-        a:hover {
-            color: #357abd;
-        }
-    </style>
+.portrait-text-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem;
+  text-align:center;
+}
+
+.portrait-initial{
+  font-family:'DM Serif Display',serif;
+  font-size:10rem;
+  line-height:1;
+  color:rgba(247,240,227,0.15);
+  font-style:italic;
+  user-select:none;
+}
+
+.portrait-border{
+  position:absolute;inset:-8px;
+  border:1px solid rgba(232,165,32,0.3);
+  border-radius:4px;
+  pointer-events:none;
+}
+
+.portrait-border::before{
+  content:'';
+  position:absolute;top:8px;left:8px;right:8px;bottom:8px;
+  border:1px solid rgba(232,165,32,0.15);
+  border-radius:3px;
+}
+
+.portrait-badge{
+  position:absolute;bottom:-1.5rem;right:-1.5rem;
+  width:90px;height:90px;
+  background:var(--ochre);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  box-shadow:0 8px 32px rgba(200,134,10,0.5);
+  animation:badgeFloat 4s ease-in-out infinite;
+}
+
+@keyframes badgeFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
+
+.badge-year{
+  font-family:'DM Serif Display',serif;
+  font-size:1.4rem;
+  color:var(--ink);
+  line-height:1;
+}
+
+.badge-label{
+  font-family:'Courier Prime',monospace;
+  font-size:0.5rem;
+  letter-spacing:0.15em;
+  color:var(--ink);
+  text-transform:uppercase;
+}
+
+.about-text{}
+
+.about-quote{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.3rem,2.5vw,1.8rem);
+  font-style:italic;
+  line-height:1.5;
+  color:var(--wheat);
+  margin-bottom:2.5rem;
+  padding-left:1.5rem;
+  border-left:3px solid var(--gold);
+}
+
+.about-body{
+  font-family:'Spectral',serif;
+  font-size:1rem;
+  line-height:1.8;
+  color:rgba(247,240,227,0.8);
+  margin-bottom:2rem;
+}
+
+.about-body strong{
+  color:var(--wheat);
+  font-weight:600;
+}
+
+.affiliation-chips{
+  display:flex;flex-wrap:wrap;gap:0.5rem;
+  margin-top:1.5rem;
+}
+
+.chip{
+  font-family:'Courier Prime',monospace;
+  font-size:0.6rem;
+  letter-spacing:0.1em;
+  padding:0.3rem 0.8rem;
+  background:rgba(36,85,164,0.2);
+  border:1px solid rgba(36,85,164,0.4);
+  color:var(--sky);
+  border-radius:1px;
+}
+
+/* ==============================
+   RESEARCH / PUBLICATIONS
+================================*/
+#research{
+  background:linear-gradient(to bottom, transparent, rgba(26,10,0,0.5), transparent);
+}
+
+.publications-list{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+.pub-item{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:2rem;
+  align-items:start;
+  padding:2.5rem 0;
+  border-bottom:1px solid rgba(232,165,32,0.1);
+  position:relative;
+  transition:all 0.4s;
+  cursor:pointer;
+}
+
+.pub-item::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(to right, rgba(200,134,10,0.05), transparent);
+  transition:width 0.4s;
+}
+
+.pub-item:hover::before{width:100%;}
+
+.pub-year{
+  font-family:'Courier Prime',monospace;
+  font-size:0.7rem;
+  color:var(--gold);
+  letter-spacing:0.1em;
+  min-width:4rem;
+  padding-top:0.25rem;
+}
+
+.pub-content{}
+
+.pub-title{
+  font-family:'DM Serif Display',serif;
+  font-size:1.15rem;
+  color:var(--ivory);
+  margin-bottom:0.5rem;
+  line-height:1.3;
+  transition:color 0.3s;
+}
+
+.pub-item:hover .pub-title{color:var(--wheat);}
+
+.pub-venue{
+  font-family:'Spectral',serif;
+  font-size:0.85rem;
+  font-style:italic;
+  color:rgba(247,240,227,0.5);
+  margin-bottom:0.4rem;
+}
+
+.pub-authors{
+  font-family:'Spectral',serif;
+  font-size:0.8rem;
+  color:rgba(247,240,227,0.4);
+}
+
+.pub-authors .me{color:var(--wheat);}
+
+.pub-badge{
+  font-family:'Courier Prime',monospace;
+  font-size:0.55rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  padding:0.3rem 0.7rem;
+  border-radius:2px;
+  white-space:nowrap;
+  margin-top:0.25rem;
+}
+
+.badge-accepted{background:rgba(90,122,74,0.3);border:1px solid rgba(90,122,74,0.6);color:#8bc474;}
+.badge-submitted{background:rgba(36,85,164,0.2);border:1px solid rgba(36,85,164,0.5);color:var(--sky);}
+.badge-published{background:rgba(200,134,10,0.2);border:1px solid rgba(200,134,10,0.4);color:var(--gold);}
+.badge-preprint{background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.4);color:#e88;}
+
+/* ==============================
+   EXPERIENCE TIMELINE
+================================*/
+#experience{
+  background:linear-gradient(135deg, rgba(192,57,43,0.05) 0%, transparent 60%);
+}
+
+.timeline{
+  max-width:900px;
+  margin:0 auto;
+  position:relative;
+}
+
+.timeline::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom, transparent, var(--gold), var(--ochre), transparent);
+}
+
+.timeline-item{
+  padding-left:3rem;
+  padding-bottom:4rem;
+  position:relative;
+}
+
+.timeline-dot{
+  position:absolute;left:-6px;top:0.5rem;
+  width:13px;height:13px;
+  border-radius:50%;
+  background:var(--ink);
+  border:2px solid var(--gold);
+  transition:all 0.4s;
+}
+
+.timeline-item:hover .timeline-dot{
+  background:var(--gold);
+  box-shadow:0 0 20px rgba(232,165,32,0.8);
+  transform:scale(1.4);
+}
+
+.timeline-date{
+  font-family:'Courier Prime',monospace;
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:0.6rem;
+}
+
+.timeline-role{
+  font-family:'DM Serif Display',serif;
+  font-size:1.4rem;
+  color:var(--ivory);
+  margin-bottom:0.3rem;
+  line-height:1.2;
+}
+
+.timeline-org{
+  font-family:'Spectral',serif;
+  font-size:0.9rem;
+  font-style:italic;
+  color:rgba(247,240,227,0.55);
+  margin-bottom:1rem;
+}
+
+.timeline-body{
+  font-family:'Spectral',serif;
+  font-size:0.9rem;
+  line-height:1.7;
+  color:rgba(247,240,227,0.7);
+}
+
+.timeline-body li{
+  margin-bottom:0.4rem;
+  padding-left:1rem;
+  position:relative;
+  list-style:none;
+}
+
+.timeline-body li::before{
+  content:'—';
+  position:absolute;left:0;
+  color:var(--gold);
+  opacity:0.6;
+}
+
+/* ==============================
+   SKILLS — BRUSHSTROKE BARS
+================================*/
+#skills{
+  background:linear-gradient(to bottom, transparent, rgba(36,85,164,0.08), transparent);
+}
+
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(380px, 1fr));
+  gap:4rem;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+.skill-category-title{
+  font-family:'DM Serif Display',serif;
+  font-size:1.2rem;
+  font-style:italic;
+  color:var(--wheat);
+  margin-bottom:2rem;
+  padding-bottom:0.8rem;
+  border-bottom:1px solid rgba(232,165,32,0.2);
+}
+
+.skill-item{
+  margin-bottom:1.5rem;
+}
+
+.skill-header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:0.5rem;
+}
+
+.skill-name{
+  font-family:'Courier Prime',monospace;
+  font-size:0.72rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:rgba(247,240,227,0.8);
+}
+
+.skill-level{
+  font-family:'Courier Prime',monospace;
+  font-size:0.6rem;
+  color:rgba(232,165,32,0.6);
+}
+
+.skill-track{
+  height:4px;
+  background:rgba(247,240,227,0.08);
+  border-radius:2px;
+  overflow:hidden;
+  position:relative;
+}
+
+.skill-fill{
+  height:100%;
+  border-radius:2px;
+  width:0%;
+  transition:width 1.5s cubic-bezier(0.22,1,0.36,1);
+  position:relative;
+}
+
+.skill-fill::after{
+  content:'';
+  position:absolute;right:0;top:-2px;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:inherit;
+  filter:brightness(1.5) blur(2px);
+}
+
+.fill-cobalt{background:linear-gradient(to right, var(--prussian), var(--cobalt), var(--cerulean));}
+.fill-gold{background:linear-gradient(to right, var(--ochre), var(--gold), var(--wheat));}
+.fill-vermillion{background:linear-gradient(to right, var(--crimson), var(--vermillion), #e67);}
+.fill-sage{background:linear-gradient(to right, var(--sage), var(--olive), #9cb);}
+
+/* ==============================
+   TALKS & EVENTS
+================================*/
+#talks{
+  background:linear-gradient(135deg, rgba(192,57,43,0.06) 0%, rgba(36,85,164,0.06) 100%);
+}
+
+.talks-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+  gap:2rem;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+.talk-card{
+  padding:2rem;
+  background:rgba(26,10,0,0.4);
+  border:1px solid rgba(232,165,32,0.12);
+  border-radius:3px;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.4s;
+  backdrop-filter:blur(4px);
+}
+
+.talk-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(to right, var(--cobalt), var(--gold), var(--vermillion));
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform 0.4s;
+}
+
+.talk-card:hover::before{transform:scaleX(1);}
+
+.talk-card:hover{
+  border-color:rgba(232,165,32,0.25);
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px rgba(26,10,0,0.6);
+}
+
+.talk-date{
+  font-family:'Courier Prime',monospace;
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  color:var(--gold);
+  margin-bottom:1rem;
+  text-transform:uppercase;
+}
+
+.talk-title{
+  font-family:'DM Serif Display',serif;
+  font-size:1.05rem;
+  color:var(--ivory);
+  margin-bottom:0.5rem;
+  line-height:1.4;
+}
+
+.talk-venue{
+  font-family:'Spectral',serif;
+  font-size:0.85rem;
+  font-style:italic;
+  color:rgba(247,240,227,0.5);
+  margin-bottom:0.5rem;
+}
+
+.talk-type{
+  font-family:'Courier Prime',monospace;
+  font-size:0.58rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  padding:0.2rem 0.6rem;
+  background:rgba(36,85,164,0.2);
+  border:1px solid rgba(36,85,164,0.4);
+  color:var(--sky);
+  display:inline-block;
+  border-radius:1px;
+}
+
+/* ==============================
+   EDUCATION
+================================*/
+#education{
+  background:linear-gradient(to bottom, transparent, rgba(26,58,92,0.15), transparent);
+}
+
+.edu-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+  gap:2.5rem;
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.edu-card{
+  padding:2.5rem;
+  background:rgba(26,10,0,0.5);
+  border:1px solid rgba(232,165,32,0.1);
+  border-radius:3px;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.4s;
+}
+
+.edu-card:hover{
+  border-color:rgba(232,165,32,0.3);
+  transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(26,10,0,0.5);
+}
+
+.edu-degree-level{
+  font-family:'Courier Prime',monospace;
+  font-size:2.5rem;
+  font-weight:700;
+  color:rgba(232,165,32,0.12);
+  position:absolute;top:1rem;right:1.5rem;
+  letter-spacing:-0.05em;
+  user-select:none;
+}
+
+.edu-period{
+  font-family:'Courier Prime',monospace;
+  font-size:0.62rem;
+  letter-spacing:0.2em;
+  color:var(--gold);
+  margin-bottom:1rem;
+  text-transform:uppercase;
+}
+
+.edu-degree{
+  font-family:'DM Serif Display',serif;
+  font-size:1.3rem;
+  color:var(--ivory);
+  margin-bottom:0.4rem;
+}
+
+.edu-field{
+  font-family:'Spectral',serif;
+  font-style:italic;
+  color:rgba(247,240,227,0.6);
+  font-size:0.9rem;
+  margin-bottom:0.8rem;
+}
+
+.edu-institution{
+  font-family:'Spectral',serif;
+  font-size:0.85rem;
+  color:rgba(247,240,227,0.45);
+}
+
+/* ==============================
+   CONTACT
+================================*/
+#contact{
+  min-height:50vh;
+  display:flex;align-items:center;
+  text-align:center;
+  flex-direction:column;
+  justify-content:center;
+  background:linear-gradient(135deg, rgba(26,10,0,0.8) 0%, rgba(26,58,92,0.2) 100%);
+  border-top:1px solid rgba(232,165,32,0.1);
+}
+
+.contact-inner{
+  max-width:700px;
+  margin:0 auto;
+}
+
+.contact-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2.5rem,6vw,4.5rem);
+  font-style:italic;
+  color:var(--ivory);
+  line-height:1.1;
+  margin-bottom:1.5rem;
+}
+
+.contact-sub{
+  font-family:'Spectral',serif;
+  font-size:1.1rem;
+  font-style:italic;
+  color:rgba(247,240,227,0.6);
+  margin-bottom:3rem;
+  line-height:1.7;
+}
+
+.contact-links{
+  display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;
+}
+
+.contact-link{
+  display:flex;align-items:center;gap:0.6rem;
+  font-family:'Courier Prime',monospace;
+  font-size:0.72rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  text-decoration:none;
+  color:var(--wheat);
+  transition:all 0.3s;
+  padding:0.7rem 1.5rem;
+  border:1px solid rgba(247,240,227,0.2);
+  border-radius:2px;
+}
+
+.contact-link:hover{
+  color:var(--gold);
+  border-color:var(--gold);
+  background:rgba(232,165,32,0.08);
+  transform:translateY(-2px);
+}
+
+/* ==============================
+   INTERACTIVE BRUSHSTROKE HOVER
+================================*/
+.reveal-on-scroll{
+  opacity:0;
+  transform:translateY(40px);
+  transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal-on-scroll.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ==============================
+   PAINT SPLASH — INTERACTIVE
+================================*/
+.paint-splash{
+  position:fixed;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:99997;
+  animation:splashOut 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes splashOut{
+  0%{transform:scale(0);opacity:0.9;}
+  60%{opacity:0.6;}
+  100%{transform:scale(2.5);opacity:0;}
+}
+
+/* ==============================
+   SECTION DIVIDERS
+================================*/
+.brushstroke-divider{
+  height:60px;
+  position:relative;
+  overflow:hidden;
+  margin:0;
+}
+
+.brushstroke-divider svg{
+  width:100%;height:100%;
+  opacity:0.15;
+}
+
+/* ==============================
+   FOOTER
+================================*/
+footer{
+  padding:2rem 4rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-top:1px solid rgba(232,165,32,0.08);
+  z-index:5;
+  position:relative;
+}
+
+.footer-sig{
+  font-family:'DM Serif Display',serif;
+  font-style:italic;
+  font-size:0.9rem;
+  color:rgba(247,240,227,0.3);
+}
+
+.footer-year{
+  font-family:'Courier Prime',monospace;
+  font-size:0.62rem;
+  letter-spacing:0.2em;
+  color:rgba(247,240,227,0.2);
+  text-transform:uppercase;
+}
+
+/* ==============================
+   MOBILE
+================================*/
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{gap:1.5rem;}
+  section{padding:5rem 1.5rem;}
+  .about-grid{grid-template-columns:1fr;gap:3rem;}
+  .pub-item{grid-template-columns:1fr;gap:0.5rem;}
+  .skills-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:1rem;text-align:center;}
+}
+</style>
 </head>
 <body>
-    <div class="loading-screen" id="loading">
-        <div class="loading-text">
-            Loading<span class="loading-dots"></span>
+
+<!-- CUSTOM CURSOR -->
+<div id="brush-cursor"></div>
+<canvas id="paint-trail-canvas"></canvas>
+
+<!-- IMPRESSIONIST BACKGROUND -->
+<canvas id="impasto-canvas"></canvas>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-title">Sayan K Chaki</div>
+  <div class="loader-subtitle">Initializing Forward Pass</div>
+  <canvas id="neural-canvas"></canvas>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar" id="loader-bar"></div>
+  </div>
+  <div id="loader-text">Loading weights...</div>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#hero" class="nav-logo">SKC</a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#research">Research</a>
+    <a href="#experience">Experience</a>
+    <a href="#skills">Skills</a>
+    <a href="#talks">Talks</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-painting"></div>
+  <canvas class="swirl-canvas" id="swirl-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Postdoctoral Researcher · École Centrale de Lyon · Inria</div>
+    <h1 class="hero-name">Sayan<br><span class="italic">K Chaki</span></h1>
+    <div class="hero-subtitle">Painting Intelligence with Mathematics and Light</div>
+    <div class="hero-tags">
+      <span class="tag">Fairness in LLMs</span>
+      <span class="tag">Multi-Agent Systems</span>
+      <span class="tag">Equivariant Generative Models</span>
+      <span class="tag">Social Choice Theory</span>
+      <span class="tag">Computer Vision</span>
+      <span class="tag">Deep Learning</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#research" class="btn-primary">View Research</a>
+      <a href="#contact" class="btn-secondary">Get in Touch</a>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">01 — About</div>
+  <div class="about-grid">
+    <div class="about-portrait reveal-on-scroll">
+      <div class="portrait-frame">
+        <div class="portrait-bg">
+          <div class="portrait-swirl"></div>
+          <canvas id="portrait-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
         </div>
-        <div class="neural-network" id="network">
-            <svg width="400" height="200" viewBox="0 0 400 200">
-                <!-- Input Layer -->
-                <circle class="node" cx="50" cy="50" r="10" />
-                <circle class="node" cx="50" cy="90" r="10" />
-                <circle class="node" cx="50" cy="130" r="10" />
-                <circle class="node" cx="50" cy="170" r="10" />
-                
-                <!-- Hidden Layer -->
-                <circle class="node" cx="200" cy="70" r="10" />
-                <circle class="node" cx="200" cy="110" r="10" />
-                <circle class="node" cx="200" cy="150" r="10" />
-                
-                <!-- Output Layer -->
-                <circle class="node" cx="350" cy="110" r="10" />
-            </svg>
+        <div class="portrait-text-overlay">
+          <div class="portrait-initial">S</div>
         </div>
+        <div class="portrait-border"></div>
+        <div class="portrait-badge">
+          <div class="badge-year">PhD</div>
+          <div class="badge-label">2025</div>
+        </div>
+      </div>
     </div>
 
-    <div class="main-content" id="main">
-        <div class="convolution-bg">
-            <svg width="100%" height="100%">
-                <defs>
-                    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-                        <rect class="grid" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="33" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="66" y="33" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="33" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                        <rect class="grid" x="66" y="66" width="33" height="33" fill="none" stroke="#333" stroke-width="1" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-        </div>
-        <div class="content">
-            <h1>Sayan K Chaki</h1>
-    <div class="bio-card">
-        <div class="quote-mark">"</div>
-        <p class="subtitle">Final-year doctoral candidate specialising in computer vision and digital humanities, with expertise in unsupervised
-        analysis of historical ornaments. Collaborated with University of Oxford's VGG, IMAGINE École des Ponts
-        ParisTech, and TU Vienna on computational analysis of cultural artefacts.</p>
+    <div class="about-text reveal-on-scroll">
+      <div class="section-title">Artist of<br><span class="italic">Artificial Minds</span></div>
+      <blockquote class="about-quote">
+        "I do not paint what I see — I paint what must be known."
+      </blockquote>
+      <p class="about-body">
+        Postdoctoral researcher at <strong>École Centrale de Lyon</strong> and <strong>Inria</strong>, working within the ANR DIKE project on <strong>fairness in Large Language Models</strong> and multi-agent resource allocation. My work stands at the intersection of formal mathematics and the living, breathing dynamics of intelligent systems.
+      </p>
+      <p class="about-body">
+        My PhD research — completed at Inria, Laboratoire Hubert Curien, and Université Jean Monnet — pioneered advances in <strong>equivariant generative architectures</strong>, bringing group theory and PAC-Bayesian frameworks to bear on object decomposition and historical document analysis. I have delivered invited talks at Oxford, Vienna, and Wolfenbüttel.
+      </p>
+      <div class="affiliation-chips">
+        <span class="chip">Inria</span>
+        <span class="chip">École Centrale de Lyon</span>
+        <span class="chip">Univ. Jean Monnet</span>
+        <span class="chip">Naver Labs Europe</span>
+        <span class="chip">ANR DIKE</span>
+        <span class="chip">Univ. Lyon 2</span>
+      </div>
     </div>
-            
-            <div>
-                <button class="btn" onclick="showSection('experience')">Experience</button>
-                <button class="btn" onclick="showSection('research')">Research</button>
-                <button class="btn" onclick="showSection('teaching')">Teaching</button>
-                <button class="btn" onclick="showSection('summer-schools')">Summer School</button>
-                <button class="btn btn-secondary" onclick="showModal('contact')">Contact</button>
-            </div>
+  </div>
+</section>
 
-        <div class="content">
-        
+<!-- RESEARCH / PUBLICATIONS -->
+<section id="research">
+  <div class="section-label">02 — Research</div>
+  <div class="section-title">Publications &<br><span class="italic">Contributions</span></div>
 
-            <div id="experience" class="section">
-                <h2>Professional Experience</h2>
-                <div class="experience-item">
-                    <h3>PhD Scholar in Image, Vision, and Signal Processing</h3>
-                    <p><strong>Inria, Laboratoire Hubert Curien | Sep 2022– Present</strong></p>
-                    <ul>
-                        <li>Developing an equivariant model for unsupervised detection and segmentation of ornaments from historical manuscripts</li>
-                        <li>Affine transformation invariance with lowdata solutions</li>
-                        <li>Equivariance principles for model robustness in ANR project "Rey's Ornament Image Investigation"</li>
-                    </ul>
-                </div>
-                <div class="experience-item">
-                    <h3>Research (Master) Intern</h3>
-                    <p><strong>Laboratoire Hubert Curien | Mar 2022– Jul 2022</strong></p>
-                    <ul>
-                        <li>Developed Spatial Transformer AutoEncoder for anomaly segmentation</li>
-                        <li>Compiled benchmark vignettes dataset from ornaments in books</li>
-                    </ul>
-                </div>
-                <div class="experience-item">
-                    <h3>Software Developer Intern</h3>
-                    <p><strong>IBM India & KLA Tencor | May 2021– Jul 2021</strong></p>
-                    <ul>
-                        <li>Developed anomaly segmentation algorithms for 3D fault detection</li>
-                        <li>Created an integrated crossplatform ecosystem using React</li>
-                    </ul>
-                </div>
-            </div>
-            <div id="contactModal" class="modal">
-            <div class="modal-content">
-              <span class="close-btn" onclick="hideModal('contact')">&times;</span>
-               <h2>Contact Information</h2>
-                <p>Email: sayan.chaki@inria.fr; sayan.kumar.chaki@univ-st-etienne.fr</p>
-                <p>Phone: +33 768753462</p>
-                <p>LinkedIn: linkedin.com/in/sayan-chaki-vision/</p>
-                <p>GitHub: github.com/SayanChaki</p>
-            
-            </div>
-            </div>
-            <div id="research" class="section">
-                <h2>Research & Publications</h2>
-                <div class="research-grid">
-                    <div class="research-card">
-                        <div class="research-thumbnail">
-                            <img src="/api/placeholder/300/200" alt="Rotation Equivariant Detector" />
-                        </div>
-                        <div class="research-content">
-                            <h3>Making Spatial Transformer Networks Rotation-Equivariant:
-Variational Autoencoding to Object Detection</h3>
-                            <p>Submitted to ICML 2025</p>
-                            <p>Led a team of researchers in addressing limitations in 3D reconstructions and modelling of byzantine seals</p>
-                        </div>
-                    </div>
-                    <div class="research-card">
-                        <div class="research-thumbnail">
-                            <img src="https://printed-ornaments.github.io/images/teaser.png" alt="Historical Ornaments" style="width: 100%; height: 200px; object-fit: cover; object-position: center;" />
-                        </div>
-                        <div class="research-content">
-                            <h3>Historical Printed Ornaments Dataset and Tasks -</h3>
-                            <p> Published in ICDAR 2024</p>
-                            <a href="https://printed-ornaments.github.io/" target="_blank">View Project Page</a>
-                        </div>
-                    </div>
-                    <div class="research-card">
-                        <div class="research-thumbnail">
-                            <img src="https://raw.githubusercontent.com/SayanChaki/SayanChaki.github.io/refs/heads/main/image/Screenshot%20from%202025-01-21%2015-17-33.png" style="width: 100%; height: 200px; object-fit: cover; object-position: center;" />
-                        </div>
-                        <div class="research-content">
-                            <h3>Anomaly localization and Pattern Comparison</h3>
-                            <p>One-to-many pattern comparison combining fully-connected
-autoencoder with spatial transformer for ornament investigation</p>
-                            <a href="https://doi.org/10.21203/rs.3.rs-3573134/v1" target="_blank">View Paper</a>
-                        </div>
-                    </div>
-                    <div class="research-card">
-                        <div class="research-thumbnail">
-                            <img src="https://media.licdn.com/dms/image/v2/D4E22AQEwUqWi9n5olQ/feedshare-shrink_800/feedshare-shrink_800/0/1710777919291?e=1740614400&v=beta&t=0I2Cee7Rs-hRe0YV_dQCXAPRThYGF8t2XGUKTybATUk" style="width: 100%; height: 200px; object-fit: cover; object-position: center;" />
-                        </div>
-                        <div class="research-content">
-                            <h3>Computing the Early Page in Modern Europe</h3>
-                            <p>University of Oxford - March 2024</p>
-                            <p>Invited talk on unsupervised decomposition of historical document elements, focused on early page structures of ancient
-European books</p>
-                        </div>
+  <div class="publications-list">
 
-                </div>
-                
-                    <div class="research-card">
-                        <div class="research-thumbnail">
-                            <img src="https://dh.univie.ac.at/fileadmin/_processed_/csm_Poster_version_2.1_4465efa65e.jpg" style="width: 100%; height: 200px; object-fit: cover; object-position: center;" />
-                        </div>
-                        <div class="research-content">
-                            <h3>Intermediality and Computational Humanities Hackathon</h3>
-                            <p>University of Vienna - November 2024</p>
-                            <p>Led a team of researchers in addressing limitations in 3D reconstructions and modelling of byzantine seals</p>
-                        </div>
-                    </div>
-                
-                           
-            </div>
-            </div>
-            <div id="teaching" class="section">
-                <h2>Teaching Experience</h2>
-                <div class="experience-item">
-                    <h3>Introduction to Machine Learning</h3>
-                    <p><strong>Institut d'Optique Graduate School (24 hrs)</strong></p>
-                    <ul>
-                        <li>Supervised/unsupervised learning, neural networks (CNNs, GANs, VAEs)</li>
-                        <li>Model evaluation with practical Python implementations</li>
-                    </ul>
-                </div>
-                <div class="experience-item">
-                    <h3>Introduction to Python</h3>
-                    <p><strong>Institut d'Optique Graduate School (24 hrs)</strong></p>
-                    <ul>
-                        <li>Python basics, data structures, libraries (NumPy, pandas)</li>
-                        <li>Applications in data analysis and machine learning</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div id="summer-schools" class="section">
-                <h2>Summer Schools</h2>
-                <div class="experience-item">
-                    <h3>Google DeepMind ProbAI Summer School</h3>
-                    <p><strong>NTNU, Trondheim, Norway | June 2023</strong></p>
-                    <ul>
-                        <li>Advanced probabilistic AI techniques in generative modeling</li>
-                        <li>Presented poster on probabilistic methods in document analysis</li>
-                    </ul>
-                </div>
-                <div class="experience-item">
-                    <h3>Generative Modelling Summer School (GeMSS)</h3>
-                    <p><strong>TU Eindhoven, DTU, Inria | June 2024</strong></p>
-                    <ul>
-                        <li>Advanced methods in generative modeling and variational inference</li>
-                        <li>Presented poster on applications in digital humanities</li>
-                    </ul>
-                </div>
-
-                
-            </div>
-            </div>
-        </div>
-    </div>
-        </div>
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">2026</div>
+      <div class="pub-content">
+        <div class="pub-title">Equivariant Unsupervised Object Detection with Learnable Riesz Transform and Composite Spatial Transformers</div>
+        <div class="pub-venue">CVPR Findings 2026</div>
+        <div class="pub-authors"><span class="me">Sayan Chaki</span>, Thierry Fournel, Rémi Emonet</div>
+      </div>
+      <div class="pub-badge badge-accepted">Accepted</div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                document.getElementById('network').classList.add('show');
-                startNeuralAnimation();
-            }, 1000);
-        });
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">2026</div>
+      <div class="pub-content">
+        <div class="pub-title">Fairness as Emergence: Alignment and Interaction in Multi-Agent LLM Systems</div>
+        <div class="pub-venue">COLM 2026 (Submitted)</div>
+        <div class="pub-authors"><span class="me">Sayan Chaki</span>, Julien Veclin, Antoine Gourru</div>
+      </div>
+      <div class="pub-badge badge-submitted">Submitted</div>
+    </div>
 
-        function startNeuralAnimation() {
-            const nodes = document.querySelectorAll('.node');
-            let step = 0;
-            
-            function animateNodes() {
-                if (step === 0) {
-                    nodes.forEach((node, i) => {
-                        if (i < 4) node.classList.add('active');
-                    });
-                    createConnections(0, 4, 4, 7);
-                } else if (step === 1) {
-                    nodes.forEach((node, i) => {
-                        if (i >= 4 && i < 7) node.classList.add('active');
-                    });
-                    createConnections(4, 7, 7, 8);
-                } else if (step === 2) {
-                    nodes[7].classList.add('active');
-                } else if (step === 3) {
-                    finishLoading();
-                    return;
-                }
-                step++;
-                setTimeout(animateNodes, 800);
-            }
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">2025</div>
+      <div class="pub-content">
+        <div class="pub-title">Decoding Ink in Historical Documents: Anomaly Localisation and Source Separation</div>
+        <div class="pub-venue">Workshop on Information Optics (WIO 2025), Barcelona · Springer Nature</div>
+        <div class="pub-authors"><span class="me">Sayan K Chaki</span>, M Hebert, JM Becker, R Emonet, T Fournel</div>
+      </div>
+      <div class="pub-badge badge-published">Published</div>
+    </div>
 
-            function createConnections(startIdx, endIdx, targetStartIdx, targetEndIdx) {
-                const svg = document.querySelector('.neural-network svg');
-                for (let i = startIdx; i < endIdx; i++) {
-                    for (let j = targetStartIdx; j < targetEndIdx; j++) {
-                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                        const node1 = nodes[i];
-                        const node2 = nodes[j];
-                        line.setAttribute('x1', node1.getAttribute('cx'));
-                        line.setAttribute('y1', node1.getAttribute('cy'));
-                        line.setAttribute('x2', node2.getAttribute('cx'));
-                        line.setAttribute('y2', node2.getAttribute('cy'));
-                        line.setAttribute('class', 'connection');
-                        svg.insertBefore(line, svg.firstChild);
-                    }
-                }
-            }
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">2024</div>
+      <div class="pub-content">
+        <div class="pub-title">Historical Printed Ornaments: Dataset and Tasks</div>
+        <div class="pub-venue">ICDAR 2024 · Springer Nature Switzerland</div>
+        <div class="pub-authors"><span class="me">Chaki SK</span>, Baltaci ZS, Vincent E, Emonet R, Vial-Bonacci F, Bahier-Porte C, Aubry M, Fournel T</div>
+      </div>
+      <div class="pub-badge badge-published">Published</div>
+    </div>
 
-            animateNodes();
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">2023</div>
+      <div class="pub-content">
+        <div class="pub-title">One-to-Many Pattern Comparison Combining Fully-Connected Autoencoder with Spatial Transformer for Ornament Investigation</div>
+        <div class="pub-venue">Research Square Preprint</div>
+        <div class="pub-authors"><span class="me">Sayan Chaki</span>, Simon Steinlin, Rémi Emonet et al.</div>
+      </div>
+      <div class="pub-badge badge-preprint">Preprint</div>
+    </div>
+
+    <div class="pub-item reveal-on-scroll">
+      <div class="pub-year">TBD</div>
+      <div class="pub-content">
+        <div class="pub-title">Localising Perceptual Anomalies with Riesz Encoding and Gabor Skeleton Masks</div>
+        <div class="pub-venue">In Preparation</div>
+        <div class="pub-authors"><span class="me">Sayan Chaki</span>, Rémi Emonet, Thierry Fournel</div>
+      </div>
+      <div class="pub-badge badge-submitted">In Prep</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">03 — Experience</div>
+  <div class="section-title">A <span class="italic">Journey</span><br>through Knowledge</div>
+
+  <div class="timeline">
+
+    <div class="timeline-item reveal-on-scroll">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Dec 2025 — Present</div>
+      <div class="timeline-role">Postdoctoral Researcher</div>
+      <div class="timeline-org">Inria · École Centrale Lyon · Univ. Jean Monnet · Naver Labs Europe</div>
+      <ul class="timeline-body">
+        <li>Investigating Fairness in LLMs in Multi-Agent Resource Allocation (ANR DIKE project)</li>
+        <li>Studying deviations in safe and fair models to investigate backdoor attacks in safely aligned language models</li>
+        <li>Leveraging optimisation policies to analyse multi-agent dynamics under Arrow's Impossibility constraints</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item reveal-on-scroll">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Sep 2022 — Nov 2025</div>
+      <div class="timeline-role">PhD Scholar</div>
+      <div class="timeline-org">Inria · Laboratoire Hubert Curien · Institut d'Optique Graduate School · UJM</div>
+      <ul class="timeline-body">
+        <li>Built unsupervised equivariant object detection models for the ANR "Rey's Ornament Image Investigation" project</li>
+        <li>Leveraged group theory and PAC-Bayesian frameworks to mathematically establish model generalisability</li>
+        <li>Demonstrated SOTA on unsupervised object decomposition and anomaly localisation</li>
+        <li>Collaborated with interdisciplinary teams in digital humanities and heritage preservation</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item reveal-on-scroll">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Mar 2022 — Jul 2022</div>
+      <div class="timeline-role">Research Intern in Computer Vision</div>
+      <div class="timeline-org">Laboratoire Hubert Curien · UJM · CNRS UMR 5516</div>
+      <ul class="timeline-body">
+        <li>Designed Spatial Transformer AutoEncoder for anomaly segmentation on MVTec benchmark data</li>
+        <li>Improved SOTA performance for ornament detection and segmentation</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item reveal-on-scroll">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">May 2021 — Jul 2021</div>
+      <div class="timeline-role">Software Developer Intern</div>
+      <div class="timeline-org">KLA Tencor India</div>
+      <ul class="timeline-body">
+        <li>Engineered anomaly segmentation algorithms for 3D fault detection</li>
+        <li>Streamlined cross-platform UI ecosystem using React and Electron JS</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item reveal-on-scroll">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">May 2021 — Jul 2021</div>
+      <div class="timeline-role">Research Assistant · Analytic Number Theory</div>
+      <div class="timeline-org">Indian Statistical Institute, Kolkata · Advised by Satadal Ganguly</div>
+      <ul class="timeline-body">
+        <li>Results on irreducible Diophantine equations and their connections to longstanding problems in number theory</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">04 — Skills</div>
+  <div class="section-title">The <span class="italic">Palette</span><br>of Craft</div>
+
+  <div class="skills-grid">
+    <div class="reveal-on-scroll">
+      <div class="skill-category-title">Deep Learning & Frameworks</div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">PyTorch</span>
+          <span class="skill-level">Expert</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-cobalt" data-width="95"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">LangChain / LLM Systems</span>
+          <span class="skill-level">Advanced</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-cobalt" data-width="88"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">TensorFlow / Keras</span>
+          <span class="skill-level">Advanced</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-cobalt" data-width="82"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">OpenCV / PyTorch3D</span>
+          <span class="skill-level">Advanced</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-cobalt" data-width="85"></div></div>
+      </div>
+    </div>
+
+    <div class="reveal-on-scroll">
+      <div class="skill-category-title">Research & Theory</div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Generative Models</span>
+          <span class="skill-level">Expert</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-gold" data-width="95"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Equivariant Architectures</span>
+          <span class="skill-level">Expert</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-gold" data-width="93"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Social Choice Theory</span>
+          <span class="skill-level">Advanced</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-gold" data-width="87"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Multi-Agent RL</span>
+          <span class="skill-level">Advanced</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-gold" data-width="84"></div></div>
+      </div>
+    </div>
+
+    <div class="reveal-on-scroll">
+      <div class="skill-category-title">Programming</div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Python</span>
+          <span class="skill-level">Expert</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-vermillion" data-width="98"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">C++ / C#</span>
+          <span class="skill-level">Proficient</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-vermillion" data-width="72"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">LaTeX / Beamer</span>
+          <span class="skill-level">Expert</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-vermillion" data-width="90"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Java / React / Electron</span>
+          <span class="skill-level">Proficient</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-vermillion" data-width="70"></div></div>
+      </div>
+    </div>
+
+    <div class="reveal-on-scroll">
+      <div class="skill-category-title">Languages</div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">English</span>
+          <span class="skill-level">Native / Fluent</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-sage" data-width="100"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Bengali</span>
+          <span class="skill-level">Maternal</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-sage" data-width="100"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">French</span>
+          <span class="skill-level">Intermediate</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-sage" data-width="62"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">Hindi / Nepali</span>
+          <span class="skill-level">Maternal</span>
+        </div>
+        <div class="skill-track"><div class="skill-fill fill-sage" data-width="100"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TALKS -->
+<section id="talks">
+  <div class="section-label">05 — Invited Talks</div>
+  <div class="section-title">Voices<br><span class="italic">Across Institutions</span></div>
+
+  <div class="talks-grid">
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">September 2025</div>
+      <div class="talk-title">Methods for Micro and Mesotypography</div>
+      <div class="talk-venue">Herzog August Bibliothek, Wolfenbüttel, Germany</div>
+      <span class="talk-type">Invited Speaker</span>
+    </div>
+
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">November 2024</div>
+      <div class="talk-title">Intermediality and Computational Humanities Hackathon</div>
+      <div class="talk-venue">University of Vienna</div>
+      <span class="talk-type">Team Leader · NeRF-based Byzantine Sigillography</span>
+    </div>
+
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">June 2024</div>
+      <div class="talk-title">Generative Modeling Summer School</div>
+      <div class="talk-venue">TU Eindhoven · DTU · Inria</div>
+      <span class="talk-type">Poster Presenter</span>
+    </div>
+
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">March 2024</div>
+      <div class="talk-title">Computing the Early Page in Modern Europe</div>
+      <div class="talk-venue">University of Oxford</div>
+      <span class="talk-type">Invited Speaker & Collaborator</span>
+    </div>
+
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">June 2023</div>
+      <div class="talk-title">Google DeepMind ProbAI Summer School</div>
+      <div class="talk-venue">NTNU Trondheim, Norway</div>
+      <span class="talk-type">Attendee · Probabilistic AI</span>
+    </div>
+
+    <div class="talk-card reveal-on-scroll">
+      <div class="talk-date">2024</div>
+      <div class="talk-title">Deep Learning Enabled Autonomous Drone Network</div>
+      <div class="talk-venue">Pulsalys Explaura Bootcamp · Lyon</div>
+      <span class="talk-type">🏆 Coup de Cœur Award</span>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">06 — Education</div>
+  <div class="section-title">Foundations of<br><span class="italic">a Mind</span></div>
+
+  <div class="edu-grid">
+    <div class="edu-card reveal-on-scroll">
+      <div class="edu-degree-level">PhD</div>
+      <div class="edu-period">Sep 2022 — Nov 2025</div>
+      <div class="edu-degree">Doctor of Philosophy</div>
+      <div class="edu-field">Image, Vision & Signal Processing</div>
+      <div class="edu-institution">Inria · Laboratoire Hubert Curien · Institut d'Optique Graduate School · IHRIM · UJM · Univ Lyon</div>
+    </div>
+
+    <div class="edu-card reveal-on-scroll">
+      <div class="edu-degree-level">MSc</div>
+      <div class="edu-period">Oct 2020 — Jul 2022</div>
+      <div class="edu-degree">Master of Science</div>
+      <div class="edu-field">Computer Science</div>
+      <div class="edu-institution">National Institute of Technology, Tiruchirappalli, India</div>
+    </div>
+
+    <div class="edu-card reveal-on-scroll">
+      <div class="edu-degree-level">BSc</div>
+      <div class="edu-period">Jul 2017 — Jun 2020</div>
+      <div class="edu-degree">Bachelor of Science</div>
+      <div class="edu-field">Statistics</div>
+      <div class="edu-institution">Ramakrishna Mission Residential College (Narendrapur) · University of Calcutta</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner reveal-on-scroll">
+    <div class="section-label" style="justify-content:center;">07 — Contact</div>
+    <div class="contact-title">Let's Create<br><span style="font-style:italic;color:var(--wheat)">Something Beautiful</span></div>
+    <div class="contact-sub">
+      Whether you want to discuss fairness in AI, collaborate on research, or simply exchange ideas across the boundary of art and intelligence — I am here.
+    </div>
+    <div class="contact-links">
+      <a href="mailto:sayanchakiwork@gmail.com" class="contact-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        sayanchakiwork@gmail.com
+      </a>
+      <a href="https://linkedin.com/in/sayan-chaki-vision/" target="_blank" class="contact-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/SayanChaki" target="_blank" class="contact-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+      <a href="tel:+33768753462" class="contact-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 6 6l.44-.44a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +33 768 753 462
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-sig">Painted by Sayan K Chaki · Lyon, France</div>
+  <div class="footer-year">© 2025 · All rights reserved</div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// ==========================================
+// CURSOR
+// ==========================================
+const brushCursor = document.getElementById('brush-cursor');
+let mx = 0, my = 0;
+let paintPoints = [];
+const trailCanvas = document.getElementById('paint-trail-canvas');
+if(trailCanvas){
+  trailCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
+  document.body.appendChild(trailCanvas);
+}
+const trailCtx = trailCanvas ? trailCanvas.getContext('2d') : null;
+
+function resizeTrail(){
+  if(trailCanvas){
+    trailCanvas.width = window.innerWidth;
+    trailCanvas.height = window.innerHeight;
+  }
+}
+resizeTrail();
+window.addEventListener('resize', resizeTrail);
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  brushCursor.style.left = mx + 'px';
+  brushCursor.style.top = my + 'px';
+  paintPoints.push({x:mx, y:my, age:0, color:`hsl(${30+Math.random()*60},${70+Math.random()*30}%,${50+Math.random()*20}%)`});
+  if(paintPoints.length > 60) paintPoints.shift();
+});
+
+function drawTrail(){
+  if(!trailCtx) return;
+  trailCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
+  for(let i=1;i<paintPoints.length;i++){
+    const p = paintPoints[i];
+    const pp = paintPoints[i-1];
+    p.age++;
+    const alpha = Math.max(0, 1 - p.age/60);
+    const w = Math.max(1, 4*(1-p.age/60));
+    trailCtx.beginPath();
+    trailCtx.moveTo(pp.x, pp.y);
+    trailCtx.lineTo(p.x, p.y);
+    trailCtx.strokeStyle = p.color.replace(')',`,${alpha})`).replace('hsl','hsla');
+    trailCtx.lineWidth = w;
+    trailCtx.lineCap = 'round';
+    trailCtx.stroke();
+  }
+  paintPoints = paintPoints.filter(p => p.age < 60);
+  requestAnimationFrame(drawTrail);
+}
+drawTrail();
+
+// Click splash
+document.addEventListener('click', e => {
+  const colors = ['#c8860a','#2455a4','#c0392b','#f2d06b','#89c4e1'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const el = document.createElement('div');
+  el.className = 'paint-splash';
+  el.style.cssText = `left:${e.clientX-20}px;top:${e.clientY-20}px;width:40px;height:40px;background:radial-gradient(circle,${color} 0%,transparent 70%);`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+});
+
+// ==========================================
+// NEURAL NETWORK LOADER
+// ==========================================
+const loaderCanvas = document.getElementById('neural-canvas');
+const loaderCtx = loaderCanvas ? loaderCanvas.getContext('2d') : null;
+const loaderEl = document.getElementById('loader');
+const loaderBar = document.getElementById('loader-bar');
+const loaderText = document.getElementById('loader-text');
+
+const MESSAGES = [
+  'Initializing impressionist layers...',
+  'Loading equivariant weights...',
+  'Sampling from latent space...',
+  'Applying fairness constraints...',
+  'Rendering forward pass...',
+  'Composing brushstrokes...',
+  'Activating neural canvas...',
+  'Portfolio ready.'
+];
+
+if(loaderCanvas && loaderCtx){
+  loaderCanvas.width = loaderCanvas.offsetWidth * devicePixelRatio;
+  loaderCanvas.height = loaderCanvas.offsetHeight * devicePixelRatio;
+  loaderCtx.scale(devicePixelRatio, devicePixelRatio);
+  const W = loaderCanvas.offsetWidth;
+  const H = loaderCanvas.offsetHeight;
+
+  // Define layers
+  const layers = [2, 5, 8, 8, 5, 3, 1];
+  const nodePos = [];
+  const layerX = layers.map((_,i)=> (i+1)/(layers.length+1) * W);
+
+  layers.forEach((n,li)=>{
+    const xArr = [];
+    for(let j=0;j<n;j++){
+      const y = (j+1)/(n+1)*H;
+      xArr.push({x:layerX[li], y, active:false, glow:0});
+    }
+    nodePos.push(xArr);
+  });
+
+  let signalLayer = 0;
+  let signalProgress = 0;
+  let progress = 0;
+  let msgIdx = 0;
+
+  function drawNeuralNet(prog){
+    loaderCtx.clearRect(0,0,W,H);
+
+    // Connections
+    for(let li=0;li<layers.length-1;li++){
+      for(const src of nodePos[li]){
+        for(const dst of nodePos[li+1]){
+          const alpha = li < signalLayer ? 0.35 : 0.08;
+          const grad = loaderCtx.createLinearGradient(src.x,src.y,dst.x,dst.y);
+          grad.addColorStop(0, `rgba(36,85,164,${alpha})`);
+          grad.addColorStop(0.5, `rgba(232,165,32,${alpha*0.6})`);
+          grad.addColorStop(1, `rgba(192,57,43,${alpha})`);
+          loaderCtx.beginPath();
+          loaderCtx.moveTo(src.x,src.y);
+          loaderCtx.lineTo(dst.x,dst.y);
+          loaderCtx.strokeStyle = grad;
+          loaderCtx.lineWidth = 0.8;
+          loaderCtx.stroke();
         }
+      }
+    }
 
-        function finishLoading() {
-            const loading = document.getElementById('loading');
-            const main = document.getElementById('main');
-            
-            loading.style.opacity = '0';
-            setTimeout(() => {
-                loading.style.display = 'none';
-                main.classList.add('show');
-                startGridAnimation();
-            }, 1000);
+    // Nodes
+    nodePos.forEach((layer,li)=>{
+      layer.forEach(node=>{
+        const isActive = li <= signalLayer;
+        const isSignal = li === signalLayer;
+        const glow = isSignal ? 0.8 + 0.2*Math.sin(Date.now()*0.008) : (isActive ? 0.5 : 0.15);
+
+        loaderCtx.beginPath();
+        loaderCtx.arc(node.x, node.y, isSignal ? 6 : 4, 0, Math.PI*2);
+        const g = loaderCtx.createRadialGradient(node.x,node.y,0,node.x,node.y,isSignal?10:5);
+        g.addColorStop(0, `rgba(232,165,32,${glow})`);
+        g.addColorStop(1, 'transparent');
+        loaderCtx.fillStyle = g;
+        loaderCtx.fill();
+
+        loaderCtx.beginPath();
+        loaderCtx.arc(node.x, node.y, isSignal ? 4 : 3, 0, Math.PI*2);
+        loaderCtx.fillStyle = isActive
+          ? `rgba(${isSignal?'232,165,32':'36,85,164'},${glow})`
+          : 'rgba(247,240,227,0.15)';
+        loaderCtx.fill();
+      });
+    });
+  }
+
+  function loaderLoop(){
+    signalProgress += 0.018;
+    if(signalProgress >= 1){
+      signalProgress = 0;
+      signalLayer = Math.min(signalLayer+1, layers.length-1);
+    }
+    progress = Math.min(100, (signalLayer/(layers.length-1))*100 + signalProgress*(100/(layers.length-1)));
+    loaderBar.style.width = progress + '%';
+
+    const newMsgIdx = Math.floor(signalLayer * MESSAGES.length / layers.length);
+    if(newMsgIdx !== msgIdx){
+      msgIdx = newMsgIdx;
+      loaderText.textContent = MESSAGES[Math.min(msgIdx, MESSAGES.length-1)];
+    }
+
+    drawNeuralNet(progress);
+
+    if(signalLayer < layers.length-1 || signalProgress < 1){
+      requestAnimationFrame(loaderLoop);
+    } else {
+      loaderBar.style.width = '100%';
+      loaderText.textContent = MESSAGES[MESSAGES.length-1];
+      setTimeout(()=>{
+        loaderEl.classList.add('hidden');
+        document.body.style.overflow = '';
+        initPage();
+      }, 800);
+    }
+  }
+
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(loaderLoop);
+} else {
+  document.body.style.overflow = '';
+  initPage();
+}
+
+// ==========================================
+// IMPRESSIONIST BACKGROUND
+// ==========================================
+function initImpastoBackground(){
+  const canvas = document.getElementById('impasto-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  function drawStroke(x,y,angle,len,thick,color){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+    const g = ctx.createLinearGradient(-len/2,0,len/2,0);
+    g.addColorStop(0,'transparent');
+    g.addColorStop(0.3,color);
+    g.addColorStop(0.7,color);
+    g.addColorStop(1,'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(0,0,len/2,thick/2,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  const strokeColors = [
+    'rgba(36,85,164,0.6)',
+    'rgba(232,165,32,0.5)',
+    'rgba(192,57,43,0.4)',
+    'rgba(90,122,74,0.4)',
+    'rgba(247,240,227,0.2)',
+    'rgba(200,134,10,0.5)',
+    'rgba(26,58,92,0.7)',
+  ];
+
+  for(let i=0;i<400;i++){
+    const x = Math.random()*canvas.width;
+    const y = Math.random()*canvas.height;
+    const angle = Math.random()*Math.PI;
+    const len = 40+Math.random()*120;
+    const thick = 2+Math.random()*12;
+    const color = strokeColors[Math.floor(Math.random()*strokeColors.length)];
+    drawStroke(x,y,angle,len,thick,color);
+  }
+}
+
+// ==========================================
+// VAN GOGH SWIRL (hero)
+// ==========================================
+function initSwirls(){
+  const canvas = document.getElementById('swirl-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize(){
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = canvas.parentElement.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const W = ()=>canvas.width, H = ()=>canvas.height;
+  let t = 0;
+
+  function drawSwirls(){
+    ctx.clearRect(0,0,W(),H());
+
+    const N = 6;
+    for(let s=0;s<N;s++){
+      const cx = W()*(0.2+s*0.12);
+      const cy = H()*(0.3+Math.sin(t*0.4+s)*0.3);
+      const r0 = 30+s*25;
+      const r1 = r0+80+s*30;
+
+      for(let r=r0;r<r1;r+=6){
+        const alpha = (1-(r-r0)/(r1-r0))*0.04;
+        ctx.beginPath();
+        const turns = 3.5;
+        for(let a=0;a<turns*Math.PI*2;a+=0.05){
+          const rr = r*(a/(turns*Math.PI*2));
+          const ang = a + t*0.3 + s*1.2;
+          const x = cx+rr*Math.cos(ang);
+          const y = cy+rr*0.6*Math.sin(ang);
+          if(a===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
         }
+        const hue = 200+s*15+t*10;
+        ctx.strokeStyle = `hsla(${hue},60%,60%,${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+    t += 0.005;
+    requestAnimationFrame(drawSwirls);
+  }
+  drawSwirls();
+}
 
-        function startGridAnimation() {
-            const grids = document.querySelectorAll('.grid');
-            let activeIndex = -1;
+// ==========================================
+// PORTRAIT CANVAS — oil painting effect
+// ==========================================
+function initPortraitCanvas(){
+  const canvas = document.getElementById('portrait-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2,2);
+  const W = canvas.offsetWidth/2, H = canvas.offsetHeight/2;
 
-            function activateRandomGrid() {
-                if (activeIndex !== -1) {
-                    grids[activeIndex].classList.remove('active');
-                }
-                activeIndex = Math.floor(Math.random() * grids.length);
-                grids[activeIndex].classList.add('active');
-                setTimeout(activateRandomGrid, 800);
-            }
+  // Abstract impressionist face
+  function paintPortrait(){
+    ctx.clearRect(0,0,W,H);
 
-            activateRandomGrid();
-        }
+    const strokes = 300;
+    for(let i=0;i<strokes;i++){
+      const x = W*0.5 + (Math.random()-0.5)*W*0.9;
+      const y = H*0.4 + (Math.random()-0.5)*H*0.85;
+      const angle = Math.PI*0.3 + (Math.random()-0.5)*1.2;
+      const len = 8+Math.random()*40;
+      const thick = 1.5+Math.random()*8;
 
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(sectionId).classList.add('active');
-        }
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(angle);
+      const palette = [
+        `rgba(26,58,92,${0.3+Math.random()*0.4})`,
+        `rgba(232,165,32,${0.2+Math.random()*0.3})`,
+        `rgba(247,240,227,${0.15+Math.random()*0.25})`,
+        `rgba(192,57,43,${0.1+Math.random()*0.2})`,
+        `rgba(200,134,10,${0.2+Math.random()*0.3})`,
+      ];
+      const g = ctx.createLinearGradient(-len/2,0,len/2,0);
+      g.addColorStop(0,'transparent');
+      g.addColorStop(0.5, palette[Math.floor(Math.random()*palette.length)]);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(0,0,len/2,thick/2,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  paintPortrait();
+}
 
-        // Fallback in case loading takes too long
-        setTimeout(() => {
-            finishLoading();
-        }, 8000);
-        function showModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            modal.style.display = 'block';
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
+// ==========================================
+// SCROLL ANIMATIONS
+// ==========================================
+function initScrollReveal(){
+  const els = document.querySelectorAll('.reveal-on-scroll');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) e.target.classList.add('visible');
+    });
+  },{threshold:0.12});
+  els.forEach(el=>observer.observe(el));
+}
 
-        function hideModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-    </script>
+// ==========================================
+// SKILL BARS — animate on scroll
+// ==========================================
+function initSkillBars(){
+  const bars = document.querySelectorAll('.skill-fill');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const target = e.target.dataset.width;
+        setTimeout(()=>{ e.target.style.width = target + '%'; }, 200);
+        observer.unobserve(e.target);
+      }
+    });
+  },{threshold:0.3});
+  bars.forEach(b=>observer.observe(b));
+}
+
+// ==========================================
+// INIT PAGE
+// ==========================================
+function initPage(){
+  initImpastoBackground();
+  initSwirls();
+  initPortraitCanvas();
+  initScrollReveal();
+  initSkillBars();
+}
+
+// Resize handler
+window.addEventListener('resize',()=>{
+  const ic = document.getElementById('impasto-canvas');
+  if(ic){ ic.width = window.innerWidth; ic.height = window.innerHeight; initImpastoBackground(); }
+});
+</script>
 </body>
 </html>
