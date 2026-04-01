@@ -71,7 +71,7 @@ body{
   gap:2rem;
   transition:opacity 0.8s ease, visibility 0.8s ease;
 }
-#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;display:none;}
 
 #neural-canvas{
   width:min(600px, 90vw);
@@ -1094,7 +1094,7 @@ footer{
 
 <!-- CUSTOM CURSOR -->
 <div id="brush-cursor"></div>
-<canvas id="paint-trail-canvas"></canvas>
+
 
 <!-- IMPRESSIONIST BACKGROUND -->
 <canvas id="impasto-canvas"></canvas>
@@ -1606,52 +1606,12 @@ footer{
 // ==========================================
 const brushCursor = document.getElementById('brush-cursor');
 let mx = 0, my = 0;
-let paintPoints = [];
-const trailCanvas = document.getElementById('paint-trail-canvas');
-if(trailCanvas){
-  trailCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
-  document.body.appendChild(trailCanvas);
-}
-const trailCtx = trailCanvas ? trailCanvas.getContext('2d') : null;
-
-function resizeTrail(){
-  if(trailCanvas){
-    trailCanvas.width = window.innerWidth;
-    trailCanvas.height = window.innerHeight;
-  }
-}
-resizeTrail();
-window.addEventListener('resize', resizeTrail);
 
 document.addEventListener('mousemove', e => {
   mx = e.clientX; my = e.clientY;
   brushCursor.style.left = mx + 'px';
   brushCursor.style.top = my + 'px';
-  paintPoints.push({x:mx, y:my, age:0, color:`hsl(${30+Math.random()*60},${70+Math.random()*30}%,${50+Math.random()*20}%)`});
-  if(paintPoints.length > 60) paintPoints.shift();
 });
-
-function drawTrail(){
-  if(!trailCtx) return;
-  trailCtx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
-  for(let i=1;i<paintPoints.length;i++){
-    const p = paintPoints[i];
-    const pp = paintPoints[i-1];
-    p.age++;
-    const alpha = Math.max(0, 1 - p.age/60);
-    const w = Math.max(1, 4*(1-p.age/60));
-    trailCtx.beginPath();
-    trailCtx.moveTo(pp.x, pp.y);
-    trailCtx.lineTo(p.x, p.y);
-    trailCtx.strokeStyle = p.color.replace(')',`,${alpha})`).replace('hsl','hsla');
-    trailCtx.lineWidth = w;
-    trailCtx.lineCap = 'round';
-    trailCtx.stroke();
-  }
-  paintPoints = paintPoints.filter(p => p.age < 60);
-  requestAnimationFrame(drawTrail);
-}
-drawTrail();
 
 // Click splash
 document.addEventListener('click', e => {
@@ -1705,22 +1665,23 @@ if(loaderCanvas && loaderCtx){
     nodePos.push(xArr);
   });
 
-  let signalLayer = 0;
-  let signalProgress = 0;
-  let progress = 0;
-  let msgIdx = 0;
+  let animDone = false;
+  const TOTAL_DURATION = 3200; // ms
+  const startTime = performance.now();
 
-  function drawNeuralNet(prog){
+  function drawNeuralNet(frac){
     loaderCtx.clearRect(0,0,W,H);
+    const activeLayer = Math.floor(frac * layers.length);
+    const pulse = 0.7 + 0.3*Math.sin(Date.now()*0.008);
 
     // Connections
     for(let li=0;li<layers.length-1;li++){
       for(const src of nodePos[li]){
         for(const dst of nodePos[li+1]){
-          const alpha = li < signalLayer ? 0.35 : 0.08;
+          const alpha = li < activeLayer ? 0.32 : 0.07;
           const grad = loaderCtx.createLinearGradient(src.x,src.y,dst.x,dst.y);
           grad.addColorStop(0, `rgba(36,85,164,${alpha})`);
-          grad.addColorStop(0.5, `rgba(232,165,32,${alpha*0.6})`);
+          grad.addColorStop(0.5, `rgba(232,165,32,${alpha*0.5})`);
           grad.addColorStop(1, `rgba(192,57,43,${alpha})`);
           loaderCtx.beginPath();
           loaderCtx.moveTo(src.x,src.y);
@@ -1735,55 +1696,54 @@ if(loaderCanvas && loaderCtx){
     // Nodes
     nodePos.forEach((layer,li)=>{
       layer.forEach(node=>{
-        const isActive = li <= signalLayer;
-        const isSignal = li === signalLayer;
-        const glow = isSignal ? 0.8 + 0.2*Math.sin(Date.now()*0.008) : (isActive ? 0.5 : 0.15);
+        const isActive = li <= activeLayer;
+        const isFront = li === activeLayer;
+        const glow = isFront ? pulse : (isActive ? 0.5 : 0.15);
+        const radius = isFront ? 5 : 3.5;
 
-        loaderCtx.beginPath();
-        loaderCtx.arc(node.x, node.y, isSignal ? 6 : 4, 0, Math.PI*2);
-        const g = loaderCtx.createRadialGradient(node.x,node.y,0,node.x,node.y,isSignal?10:5);
-        g.addColorStop(0, `rgba(232,165,32,${glow})`);
+        // Glow halo
+        const g = loaderCtx.createRadialGradient(node.x,node.y,0,node.x,node.y,radius*2.5);
+        g.addColorStop(0, `rgba(232,165,32,${glow*0.6})`);
         g.addColorStop(1, 'transparent');
+        loaderCtx.beginPath();
+        loaderCtx.arc(node.x, node.y, radius*2.5, 0, Math.PI*2);
         loaderCtx.fillStyle = g;
         loaderCtx.fill();
 
+        // Core node
         loaderCtx.beginPath();
-        loaderCtx.arc(node.x, node.y, isSignal ? 4 : 3, 0, Math.PI*2);
+        loaderCtx.arc(node.x, node.y, radius, 0, Math.PI*2);
         loaderCtx.fillStyle = isActive
-          ? `rgba(${isSignal?'232,165,32':'36,85,164'},${glow})`
-          : 'rgba(247,240,227,0.15)';
+          ? `rgba(${isFront?'232,165,32':'89,144,210'},${glow})`
+          : 'rgba(247,240,227,0.12)';
         loaderCtx.fill();
       });
     });
   }
 
-  function loaderLoop(){
-    signalProgress += 0.018;
-    if(signalProgress >= 1){
-      signalProgress = 0;
-      signalLayer = Math.min(signalLayer+1, layers.length-1);
-    }
-    progress = Math.min(100, (signalLayer/(layers.length-1))*100 + signalProgress*(100/(layers.length-1)));
-    loaderBar.style.width = progress + '%';
+  function loaderLoop(now){
+    if(animDone) return;
+    const elapsed = now - startTime;
+    const frac = Math.min(elapsed / TOTAL_DURATION, 1);
+    const pct = Math.round(frac * 100);
 
-    const newMsgIdx = Math.floor(signalLayer * MESSAGES.length / layers.length);
-    if(newMsgIdx !== msgIdx){
-      msgIdx = newMsgIdx;
-      loaderText.textContent = MESSAGES[Math.min(msgIdx, MESSAGES.length-1)];
-    }
+    loaderBar.style.width = pct + '%';
+    const msgIdx = Math.min(Math.floor(frac * MESSAGES.length), MESSAGES.length - 1);
+    loaderText.textContent = MESSAGES[msgIdx];
 
-    drawNeuralNet(progress);
+    drawNeuralNet(frac);
 
-    if(signalLayer < layers.length-1 || signalProgress < 1){
+    if(frac < 1){
       requestAnimationFrame(loaderLoop);
     } else {
+      animDone = true;
       loaderBar.style.width = '100%';
       loaderText.textContent = MESSAGES[MESSAGES.length-1];
       setTimeout(()=>{
         loaderEl.classList.add('hidden');
         document.body.style.overflow = '';
         initPage();
-      }, 800);
+      }, 600);
     }
   }
 
